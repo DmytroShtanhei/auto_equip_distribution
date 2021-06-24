@@ -1,8 +1,7 @@
 # Project related source files
-source_xl/
+source_xl
 
 # IDE files
-.idea/
 .idea
 
 # Byte-compiled / optimized / DLL files
