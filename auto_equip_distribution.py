@@ -3,6 +3,7 @@ Script
 for processing "Договір" and "Групування" .xlsx source files
 and creating "Рознарядка" .xlsx file
 """
+
 from openpyxl import load_workbook
 from operator import itemgetter
 import utils
