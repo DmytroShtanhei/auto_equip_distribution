@@ -55,10 +55,13 @@ distribution_full_list = utils.get_distribution_full_list(position_list,
 # Replace LVU codes in distribution_full_list with LVU names
 utils.replace_lvu_codes_with_names(distribution_full_list)
 
-# Sort rows by LVU
+
 # distribution_full_list_sorted_by_lvu = sorted(distribution_full_list, key=itemgetter(0))
-distribution_full_list_sorted_by_lvu = sorted(distribution_full_list, key=lambda s: (locale.strxfrm(s[0])))
-# print(distribution_full_list_sorted_by_lvu)
+
+# Sort rows by LVU
+# great explanation is here: https://stackoverflow.com/questions/36770509/sorting-with-two-key-arguments
+# (strxfrm() is used for locale aware sorting)
+distribution_full_list_sorted_by_lvu = sorted(distribution_full_list, key=lambda item: (locale.strxfrm(item[0])))
 
 # Create header and first column (numbers in order) for distribution spreadsheet
 utils.init_table_in_distribution_ws(position_list,
