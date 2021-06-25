@@ -8,6 +8,8 @@ from openpyxl import load_workbook
 from operator import itemgetter
 import utils
 from named_styles import header_style, data_style
+import locale
+locale.setlocale(locale.LC_ALL, "")
 
 distribution_wb = load_workbook(filename='Рознарядка.xlsx')
 contract_ws = distribution_wb['Договір']
@@ -54,7 +56,8 @@ distribution_full_list = utils.get_distribution_full_list(position_list,
 utils.replace_lvu_codes_with_names(distribution_full_list)
 
 # Sort rows by LVU
-distribution_full_list_sorted_by_lvu = sorted(distribution_full_list, key=itemgetter(0))
+# distribution_full_list_sorted_by_lvu = sorted(distribution_full_list, key=itemgetter(0))
+distribution_full_list_sorted_by_lvu = sorted(distribution_full_list, key=lambda s: (locale.strxfrm(s[0])))
 # print(distribution_full_list_sorted_by_lvu)
 
 # Create header and first column (numbers in order) for distribution spreadsheet
