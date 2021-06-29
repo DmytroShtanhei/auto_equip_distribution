@@ -170,19 +170,30 @@ def init_table_in_distribution_ws(positions_n_units_list, lvu_list, distribution
             cell.value = distribution_header_list[p]
             p += 1
 
+    # Populate units row
+    for row in distribution_ws.iter_rows(min_row=2, max_row=2, min_col=3, max_col=len(positions_n_units_list) + 2):
+        p = 0
+        for cell in row:
+            cell.value = positions_n_units_list[p][1]
+            p += 1
+
     # Populate Number in order column
-    for col in distribution_ws.iter_cols(max_col=1, min_row=2, max_row=len(lvu_list) + 1):
+    for col in distribution_ws.iter_cols(max_col=1, min_row=3, max_row=len(lvu_list) + 2):
         num_in_order = 1
         for cell in col:
             cell.value = num_in_order
             num_in_order += 1
 
+    # Merge appropriate cells
+    distribution_ws.merge_cells('A1:A2')
+    distribution_ws.merge_cells('B1:B2')
+
 
 def populate_table_in_distribution_ws(distribution_ws, lvu_list, positions_n_units_list, distribution_full_list):
     """Populate distribution_ws with distribution data from distribution_full_list"""
     curr_lvu_list_index = 0
-    for row in distribution_ws.iter_rows(min_row=2,
-                                         max_row=len(lvu_list)+1,
+    for row in distribution_ws.iter_rows(min_row=3,
+                                         max_row=len(lvu_list)+2,
                                          min_col=2,
                                          max_col=len(positions_n_units_list) + 2,
                                          ):
@@ -197,19 +208,19 @@ def populate_table_in_distribution_ws(distribution_ws, lvu_list, positions_n_uni
         curr_lvu_list_index += 1
 
 
-def auto_adjust_col_width(worksheet):
-    """Change columns width according to columns value length"""
-    for col in worksheet.columns:
-        max_length = 0
-        column = col[0].column_letter  # Get the column name
-        for cell in col:
-            try:  # Necessary to avoid error on empty cells
-                if len(str(cell.value)) > max_length:
-                    max_length = len(str(cell.value))
-            except:
-                pass
-        adjusted_width = (max_length + 2)
-        worksheet.column_dimensions[column].width = adjusted_width
+# def auto_adjust_col_width(worksheet):
+#     """Change columns width according to columns value length"""
+#     for col in worksheet.columns:
+#         max_length = 0
+#         column = col[0].column_letter  # Get the column name
+#         for cell in col:
+#             try:  # Necessary to avoid error on empty cells
+#                 if len(str(cell.value)) > max_length:
+#                     max_length = len(str(cell.value))
+#             except:
+#                 pass
+#         adjusted_width = (max_length + 2)
+#         worksheet.column_dimensions[column].width = adjusted_width
 
 
 def style_table_in_worksheet(workbook, worksheet, custom_header_style, custom_data_style, max_header_row=1):

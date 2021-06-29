@@ -81,6 +81,7 @@ utils.style_table_in_worksheet(workbook=distribution_wb,
                                worksheet=distribution_ws,
                                custom_header_style=header_style,
                                custom_data_style=data_style,
+                               max_header_row=2,
                                )
 
 # Save distribution workbook
