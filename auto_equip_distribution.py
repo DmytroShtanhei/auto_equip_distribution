@@ -37,17 +37,17 @@ if 'Рознарядка' in distribution_wb:
 distribution_ws = distribution_wb.create_sheet('Рознарядка')
 
 # Get list of positions from Contract table
-position_list = utils.get_position_list(contract_ws)
+positions_n_units_list = utils.get_positions_n_units_list(contract_ws)
 # Get list of LVU from Grouping table
 lvu_list = utils.get_lvu_list(grouping_copied_ws)
 
 # Get distribution data list
-distribution_data_list = utils.get_distribution_data_list(position_list,
+distribution_data_list = utils.get_distribution_data_list(positions_n_units_list,
                                                           grouping_copied_ws,
                                                           )
 
 # get_distribution_full_list
-distribution_full_list = utils.get_distribution_full_list(position_list,
+distribution_full_list = utils.get_distribution_full_list(positions_n_units_list,
                                                           lvu_list,
                                                           distribution_data_list,
                                                           )
@@ -64,7 +64,7 @@ utils.replace_lvu_codes_with_names(distribution_full_list)
 distribution_full_list_sorted_by_lvu = sorted(distribution_full_list, key=lambda item: (locale.strxfrm(item[0])))
 
 # Create header and first column (numbers in order) for distribution spreadsheet
-utils.init_table_in_distribution_ws(position_list,
+utils.init_table_in_distribution_ws(positions_n_units_list,
                                     lvu_list,
                                     distribution_ws,
                                     )
@@ -72,7 +72,7 @@ utils.init_table_in_distribution_ws(position_list,
 # Populate distribution_ws with distribution data from distribution_full_list
 utils.populate_table_in_distribution_ws(distribution_ws,
                                         lvu_list,
-                                        position_list,
+                                        positions_n_units_list,
                                         distribution_full_list_sorted_by_lvu,
                                         )
 

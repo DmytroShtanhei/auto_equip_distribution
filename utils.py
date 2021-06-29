@@ -31,15 +31,22 @@ def prepare_grouping_table(grouping_ws_to_be_prepared):
             previous_cell_val = cell.value
 
 
-def get_position_list(contract_ws):
+def get_positions_n_units_list(contract_ws):
     """Get position list from contract spreadsheet"""
-    contract_position_list = []
-    for col in contract_ws.iter_cols(min_row=3, max_col=1, values_only=True):
-        for val in col:
-            if val is not None:
-                contract_position_list.append(val)
+    # contract_position_n_units_list = []
+    # for col in contract_ws.iter_cols(min_row=3, max_col=1, values_only=True):
+    #     for val in col:
+    #         if val is not None:
+    #             contract_position_n_units_list.append(val)
 
-    return contract_position_list
+    contract_positions_n_units_list = []
+    for row in contract_ws.rows:
+        index_row = row[0].row
+        if index_row >= 3:
+            position_n_unit = [row[0].value, row[14].value]
+            contract_positions_n_units_list.append(position_n_unit)
+
+    return contract_positions_n_units_list
 
 
 def get_lvu_list(grouping_ws):
@@ -63,20 +70,20 @@ def get_lvu_list_for_position(grouping_ws, position):
     return sorted(list(set(lvu_list_for_pos)))
 
 
-def get_distribution_data_list(position_list, grouping_ws):
+def get_distribution_data_list(positions_n_units_list, grouping_ws):
     """Create list with raw data of sum per position per lvu: lvu | position | sum"""
     distribution_data_list = []
-    for curr_pos in position_list:
-        lvu_list_for_position = get_lvu_list_for_position(grouping_ws=grouping_ws, position=curr_pos)
+    for item in positions_n_units_list:
+        lvu_list_for_position = get_lvu_list_for_position(grouping_ws=grouping_ws, position=item[0])
         for curr_lvu in lvu_list_for_position:
             dist_data_row = []
             curr_sum = 0
             for row in grouping_ws.iter_rows(min_row=5, min_col=2, max_col=13, values_only=True):
-                if row[11] == curr_pos and row[6] == curr_lvu:
+                if row[11] == item[0] and row[6] == curr_lvu:
                     curr_sum += row[2]
-            # print(f'{curr_lvu} {curr_pos} {curr_sum}')
+            # print(f'{curr_lvu} {item[0]} {curr_sum}')
             dist_data_row.append(curr_lvu)
-            dist_data_row.append(curr_pos)
+            dist_data_row.append(item[0])
             dist_data_row.append(curr_sum)
             # print(dist_data_row)
             distribution_data_list.append(dist_data_row)
@@ -95,7 +102,7 @@ def get_sum_from_distribution_data_list(distribution_data_list, lvu, position):
     return 0
 
 
-def get_distribution_full_list(position_list, lvu_list, distribution_data_list):
+def get_distribution_full_list(positions_n_units_list, lvu_list, distribution_data_list):
     """
     Create distribution data full list in form of asking table:
     lvu | sum_for_pos_1 | ... | sum_for_pos_n
@@ -103,8 +110,8 @@ def get_distribution_full_list(position_list, lvu_list, distribution_data_list):
     distribution_full_list = []
     for curr_lvu in lvu_list:
         curr_lvu_list = [curr_lvu]
-        for curr_pos in position_list:
-            sum_for_lvu_for_pos = get_sum_from_distribution_data_list(distribution_data_list, curr_lvu, curr_pos)
+        for item in positions_n_units_list:
+            sum_for_lvu_for_pos = get_sum_from_distribution_data_list(distribution_data_list, curr_lvu, item[0])
             curr_lvu_list.append(sum_for_lvu_for_pos)
         distribution_full_list.append(curr_lvu_list)
 
@@ -143,16 +150,19 @@ def replace_lvu_codes_with_names(distribution_full_list):
         curr_lvu_list[0] = lvu_names_dict[curr_lvu_code]
 
 
-def init_table_in_distribution_ws(position_list, lvu_list, distribution_ws):
-    """Create header for distribution spreadsheet in form of asking table:
+def init_table_in_distribution_ws(positions_n_units_list, lvu_list, distribution_ws):
+    """Create header for distribution spreadsheet in form of asked table:
     lvu | sum_for_pos_1 | ... | sum_for_pos_n
     """
-    # Create header list
+    # Initialise header list
     distribution_header_list = [
         '№ п-п',
         'Назва ЛВУМГ (ЛВУМГ що замовляло)',
     ]
-    distribution_header_list.extend(position_list)
+    # Append positions to header list
+    for item in positions_n_units_list:
+        distribution_header_list.append(item[0])
+
     # Populate distribution_ws header row
     for row in distribution_ws.iter_rows(max_row=1, max_col=len(distribution_header_list)):
         p = 0
@@ -168,13 +178,13 @@ def init_table_in_distribution_ws(position_list, lvu_list, distribution_ws):
             num_in_order += 1
 
 
-def populate_table_in_distribution_ws(distribution_ws, lvu_list, position_list, distribution_full_list):
+def populate_table_in_distribution_ws(distribution_ws, lvu_list, positions_n_units_list, distribution_full_list):
     """Populate distribution_ws with distribution data from distribution_full_list"""
     curr_lvu_list_index = 0
     for row in distribution_ws.iter_rows(min_row=2,
                                          max_row=len(lvu_list)+1,
                                          min_col=2,
-                                         max_col=len(position_list)+2,
+                                         max_col=len(positions_n_units_list) + 2,
                                          ):
         curr_item_in_lvu_list_index = 0
         for cell in row:
