@@ -272,14 +272,14 @@ def get_units_for_position(grouping_ws, position):
     unique_units_list = list(set(units_list))
     unique_units_str = ''
     for unit in unique_units_list:
-        unique_units_str += f'{str(unit)} '
-    return unique_units_str
+        unique_units_str += f'{str(unit)}, '
+    return unique_units_str[:-2]
 
 
 def add_distribution_check_sum(distribution_ws, grouping_ws, lvu_list, positions_n_units_list, distribution_wb,
                                custom_data_style):
     """
-    Add check sums for each position for distribution, grouping and contract
+    Add check sums and units for each position for distribution, grouping and contract
     to distribution spreadsheet
     """
     # Register custom Named Styles in the Workbook if they are not registered yet.
@@ -330,3 +330,17 @@ def add_distribution_check_sum(distribution_ws, grouping_ws, lvu_list, positions
         for i in range(2, len(positions_n_units_list) + 2):
             row[i].value = f'=Договір!O{i + 1}'
             row[i].style = custom_data_style.name
+
+
+def highlight_problems(distribution_ws, lvu_list, positions_n_units_list, distribution_wb, custom_highlight_style):
+    """Highlight cells with check sums and units that don't correspond to contract sums and units"""
+    # Register custom Named Styles in the Workbook if they are not registered yet.
+    if custom_highlight_style.name not in distribution_wb.named_styles:
+        distribution_wb.add_named_style(custom_highlight_style)
+
+    for col in distribution_ws.iter_cols(min_col=3):
+        # Check units
+        grouping_units = col[len(lvu_list) + 6].value
+        distribution_units = col[1].value
+        if grouping_units.strip().lower() != distribution_units.strip().lower():
+            col[len(lvu_list) + 6].style = custom_highlight_style.name

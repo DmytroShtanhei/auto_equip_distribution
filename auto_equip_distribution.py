@@ -93,5 +93,7 @@ utils.add_distribution_check_sum(distribution_ws,
                                  distribution_wb,
                                  data_style)
 
+# Highlight problems with check sums and units
+utils.highlight_problems(distribution_ws, lvu_list, positions_n_units_list, distribution_wb, header_style)
 # Save distribution workbook
 distribution_wb.save(f'Рознарядка.xlsx')
