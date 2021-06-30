@@ -84,7 +84,10 @@ utils.style_table_in_worksheet(workbook=distribution_wb,
                                max_header_row=2,
                                )
 
-utils.add_distribution_check_sum(distribution_ws, lvu_list, positions_n_units_list)
+# print(utils.get_quantity_cell_range_for_position(grouping_copied_ws, 1))
+# Add check sums to distribution spreadsheet
+utils.add_distribution_check_sum(distribution_ws, grouping_copied_ws, lvu_list, positions_n_units_list)
+
 
 # Save distribution workbook
 distribution_wb.save(f'Рознарядка.xlsx')

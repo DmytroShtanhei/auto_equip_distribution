@@ -248,14 +248,44 @@ def style_table_in_worksheet(workbook, worksheet, custom_header_style, custom_da
     worksheet.column_dimensions['B'].width = 37 + 2
 
 
-def add_distribution_check_sum(distribution_ws, lvu_list, positions_n_units_list):
+def get_quantity_cell_range_for_position(grouping_ws, position):
     """
-    Add check summs for each position for distribution, grouping and contract
+    Get string that represents range of cells (in form like this: 'D5:D100')
+    with quantity needed for given position
+    """
+    row_range_index_list = []
+    for col in grouping_ws.iter_cols(min_row=5, min_col=13, max_col=13):
+        for cell in col:
+            if cell.value == position:
+                row_range_index_list.append(cell.row)
+
+    return f'D{min(row_range_index_list)}:D{max(row_range_index_list)}'
+
+
+def add_distribution_check_sum(distribution_ws, grouping_ws, lvu_list, positions_n_units_list):
+    """
+    Add check sums for each position for distribution, grouping and contract
     to distribution spreadsheet
     """
-    # Add check summ for distribution table
-    check_sum_row_index = len(lvu_list) + 4
-    for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index, ):
-        row[1].value = 'Рознарядка. Контрольна сума:'
+    # Add check sum for distribution table
+    check_sum_row_index = len(lvu_list) + 3
+    for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
+        row[1].value = 'Рознарядка. Сумарна кількість:'
         for i in range(2, len(positions_n_units_list) + 2):
             row[i].value = f'=SUM({row[i].column_letter}{3}:{row[i].column_letter}{len(lvu_list) + 2})'
+
+    # Add check cum for grouping
+    check_sum_row_index = len(lvu_list) + 5
+    for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
+        row[1].value = 'Групування. Сумарна кількість:'
+        for i in range(2, len(positions_n_units_list) + 2):
+            row[i].value = f'=SUM(Групування!' \
+                           f'{get_quantity_cell_range_for_position(grouping_ws, positions_n_units_list[i - 2][0])}' \
+                           f')'
+
+    # Add check cum for contract
+    check_sum_row_index = len(lvu_list) + 7
+    for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
+        row[1].value = 'Договір. Сумарна кількість:'
+        for i in range(2, len(positions_n_units_list) + 2):
+            row[i].value = f'=Договір!P{i + 1}'
