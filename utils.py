@@ -151,7 +151,8 @@ def replace_lvu_codes_with_names(distribution_full_list):
 
 
 def init_table_in_distribution_ws(positions_n_units_list, lvu_list, distribution_ws):
-    """Create header for distribution spreadsheet in form of asked table:
+    """
+    Create header for distribution spreadsheet in form of asked table:
     lvu | sum_for_pos_1 | ... | sum_for_pos_n
     """
     # Initialise header list
@@ -245,3 +246,16 @@ def style_table_in_worksheet(workbook, worksheet, custom_header_style, custom_da
 
     # Change column width
     worksheet.column_dimensions['B'].width = 37 + 2
+
+
+def add_distribution_check_sum(distribution_ws, lvu_list, positions_n_units_list):
+    """
+    Add check summs for each position for distribution, grouping and contract
+    to distribution spreadsheet
+    """
+    # Add check summ for distribution table
+    check_sum_row_index = len(lvu_list) + 4
+    for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index, ):
+        row[1].value = 'Рознарядка. Контрольна сума:'
+        for i in range(2, len(positions_n_units_list) + 2):
+            row[i].value = f'=SUM({row[i].column_letter}{3}:{row[i].column_letter}{len(lvu_list) + 2})'
