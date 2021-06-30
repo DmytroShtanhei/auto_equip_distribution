@@ -6,7 +6,7 @@ and creating "Рознарядка" .xlsx file
 
 
 def copy_table(source_ws, target_ws):
-    """Copy table from Source Spreadsheet to Target Spreadsheet of Another Workbook"""
+    """Copy table from Source Spreadsheet to Target Spreadsheet of Another Workbook."""
     # Get source table as a list
     source_table_as_list = []
     for row in source_ws.rows:
@@ -32,7 +32,7 @@ def prepare_grouping_table(grouping_ws_to_be_prepared):
 
 
 def get_positions_n_units_list(contract_ws):
-    """Get position list from contract spreadsheet"""
+    """Get position list from contract spreadsheet."""
     # contract_position_n_units_list = []
     # for col in contract_ws.iter_cols(min_row=3, max_col=1, values_only=True):
     #     for val in col:
@@ -50,7 +50,7 @@ def get_positions_n_units_list(contract_ws):
 
 
 def get_lvu_list(grouping_ws):
-    """Get LVU list from distribution spreadsheet"""
+    """Get LVU list from distribution spreadsheet."""
     distribution_lvu_list = []
     for col in grouping_ws.iter_cols(min_row=5, min_col=8, max_col=8, values_only=True):
         for val in col:
@@ -92,7 +92,7 @@ def get_distribution_data_list(positions_n_units_list, grouping_ws):
 
 
 def get_sum_from_distribution_data_list(distribution_data_list, lvu, position):
-    """Get needed sum from raw data list for given LVU and position"""
+    """Get needed sum from raw data list for given LVU and position."""
     # print(distribution_data_list)
     for item in distribution_data_list:
         # print(item)
@@ -119,7 +119,7 @@ def get_distribution_full_list(positions_n_units_list, lvu_list, distribution_da
 
 
 def replace_lvu_codes_with_names(distribution_full_list):
-    """Replace codes in distribution_full_list with names from lvu_names_dict"""
+    """Replace codes in distribution_full_list with names from lvu_names_dict."""
     # LVU names dictionary
     lvu_names_dict = {
         7001: 'ТОВ «ОГТСУ» апарат',
@@ -191,7 +191,7 @@ def init_table_in_distribution_ws(positions_n_units_list, lvu_list, distribution
 
 
 def populate_table_in_distribution_ws(distribution_ws, lvu_list, positions_n_units_list, distribution_full_list):
-    """Populate distribution_ws with distribution data from distribution_full_list"""
+    """Populate distribution_ws with distribution data from distribution_full_list."""
     curr_lvu_list_index = 0
     for row in distribution_ws.iter_rows(min_row=3,
                                          max_row=len(lvu_list)+2,
@@ -225,7 +225,7 @@ def populate_table_in_distribution_ws(distribution_ws, lvu_list, positions_n_uni
 
 
 def style_table_in_worksheet(workbook, worksheet, custom_header_style, custom_data_style, max_header_row=1):
-    """Style the table in a given worksheet"""
+    """Style the table in a given worksheet."""
     # Register custom Named Styles in the Workbook if they are not registered yet.
     if custom_header_style.name not in workbook.named_styles:
         workbook.add_named_style(custom_header_style)
@@ -251,7 +251,7 @@ def style_table_in_worksheet(workbook, worksheet, custom_header_style, custom_da
 def get_quantity_cell_range_for_position(grouping_ws, position):
     """
     Get string that represents range of cells (in form like this: 'D5:D100')
-    with quantity needed for given position
+    with quantity needed for given position.
     """
     row_range_index_list = []
     for col in grouping_ws.iter_cols(min_row=5, min_col=13, max_col=13):
@@ -262,30 +262,71 @@ def get_quantity_cell_range_for_position(grouping_ws, position):
     return f'D{min(row_range_index_list)}:D{max(row_range_index_list)}'
 
 
-def add_distribution_check_sum(distribution_ws, grouping_ws, lvu_list, positions_n_units_list):
+def get_units_for_position(grouping_ws, position):
+    """Get string that represents list of units found for given position."""
+    units_list = []
+    for col in grouping_ws.iter_cols(min_row=5, min_col=13, max_col=13):
+        for cell in col:
+            if cell.value == position:
+                units_list.append(grouping_ws[f'C{cell.row}'].value)
+    unique_units_list = list(set(units_list))
+    unique_units_str = ''
+    for unit in unique_units_list:
+        unique_units_str += f'{str(unit)} '
+    return unique_units_str
+
+
+def add_distribution_check_sum(distribution_ws, grouping_ws, lvu_list, positions_n_units_list, distribution_wb,
+                               custom_data_style):
     """
     Add check sums for each position for distribution, grouping and contract
     to distribution spreadsheet
     """
+    # Register custom Named Styles in the Workbook if they are not registered yet.
+    if custom_data_style.name not in distribution_wb.named_styles:
+        distribution_wb.add_named_style(custom_data_style)
+
     # Add check sum for distribution table
-    check_sum_row_index = len(lvu_list) + 3
+    check_sum_row_index = len(lvu_list) + 4
     for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
         row[1].value = 'Рознарядка. Сумарна кількість:'
+        row[1].style = custom_data_style.name
         for i in range(2, len(positions_n_units_list) + 2):
             row[i].value = f'=SUM({row[i].column_letter}{3}:{row[i].column_letter}{len(lvu_list) + 2})'
+            row[i].style = custom_data_style.name
 
-    # Add check cum for grouping
-    check_sum_row_index = len(lvu_list) + 5
+    # Add check sum for grouping
+    check_sum_row_index = len(lvu_list) + 6
     for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
         row[1].value = 'Групування. Сумарна кількість:'
+        row[1].style = custom_data_style.name
         for i in range(2, len(positions_n_units_list) + 2):
             row[i].value = f'=SUM(Групування!' \
                            f'{get_quantity_cell_range_for_position(grouping_ws, positions_n_units_list[i - 2][0])}' \
                            f')'
-
-    # Add check cum for contract
+            row[i].style = custom_data_style.name
+    # Add units for grouping check sum
     check_sum_row_index = len(lvu_list) + 7
     for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
+        row[1].value = 'Групування. Одиниці виміру:'
+        row[1].style = custom_data_style.name
+        for i in range(2, len(positions_n_units_list) + 2):
+            row[i].value = get_units_for_position(grouping_ws, positions_n_units_list[i - 2][0])
+            row[i].style = custom_data_style.name
+
+    # Add check sum for contract
+    check_sum_row_index = len(lvu_list) + 9
+    for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
         row[1].value = 'Договір. Сумарна кількість:'
+        row[1].style = custom_data_style.name
         for i in range(2, len(positions_n_units_list) + 2):
             row[i].value = f'=Договір!P{i + 1}'
+            row[i].style = custom_data_style.name
+    # Add units for contract check sum
+    check_sum_row_index = len(lvu_list) + 10
+    for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
+        row[1].value = 'Договір. Одиниці виміру:'
+        row[1].style = custom_data_style.name
+        for i in range(2, len(positions_n_units_list) + 2):
+            row[i].value = f'=Договір!O{i + 1}'
+            row[i].style = custom_data_style.name
