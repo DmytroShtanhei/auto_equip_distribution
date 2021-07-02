@@ -3,6 +3,7 @@ Utility functions
 for processing "Договір" and "Групування" .xlsx source files
 and creating "Рознарядка" .xlsx file
 """
+from decimal import Decimal
 
 
 def copy_table(source_ws, target_ws):
@@ -80,7 +81,7 @@ def get_distribution_data_list(positions_n_units_list, grouping_ws):
             curr_sum = 0
             for row in grouping_ws.iter_rows(min_row=5, min_col=2, max_col=13, values_only=True):
                 if row[11] == item[0] and row[6] == curr_lvu:
-                    curr_sum += row[2]
+                    curr_sum += Decimal(str(row[2]))
             # print(f'{curr_lvu} {item[0]} {curr_sum}')
             dist_data_row.append(curr_lvu)
             dist_data_row.append(item[0])
@@ -332,15 +333,44 @@ def add_distribution_check_sum(distribution_ws, grouping_ws, lvu_list, positions
             row[i].style = custom_data_style.name
 
 
-def highlight_problems(distribution_ws, lvu_list, positions_n_units_list, distribution_wb, custom_highlight_style):
-    """Highlight cells with check sums and units that don't correspond to contract sums and units"""
+def check_n_highlight_sums(contract_ws, distribution_ws, lvu_list, distribution_wb, custom_highlight_style):
+    """Highlight cells with check sums that don't correspond to contract sums"""
+    # Register custom Named Styles in the Workbook if they are not registered yet.
+    if custom_highlight_style.name not in distribution_wb.named_styles:
+        distribution_wb.add_named_style(custom_highlight_style)
+
+    curr_position = 1
+    for col in distribution_ws.iter_cols(min_col=3):
+        # Get Distribution Check Sum for Position from Distribution Table
+        distribution_sum = 0
+        for i in range(2, len(lvu_list) + 2):
+            val = col[i].value
+
+            if val is None:
+                val = 0
+            # print(Decimal(str(val)))
+            # print(val)
+            distribution_sum += val
+
+        # Get Contract Sum for Position from Contract Table
+        row_index = curr_position + 2
+        contract_sum = Decimal(str(contract_ws[f'P{row_index}'].value))
+        curr_position += 1
+
+        # Highlight distribution sums that don't correspond to contract units
+        if distribution_sum != contract_sum:
+            col[len(lvu_list) + 3].style = custom_highlight_style.name
+
+
+def check_n_highlight_units(distribution_ws, lvu_list, distribution_wb, custom_highlight_style):
+    """Highlight cells with units that don't correspond to contract units"""
     # Register custom Named Styles in the Workbook if they are not registered yet.
     if custom_highlight_style.name not in distribution_wb.named_styles:
         distribution_wb.add_named_style(custom_highlight_style)
 
     for col in distribution_ws.iter_cols(min_col=3):
-        # Check units
         grouping_units = col[len(lvu_list) + 6].value
         distribution_units = col[1].value
+        # Highlight grouping units that don't correspond to contract units
         if grouping_units.strip().lower() != distribution_units.strip().lower():
             col[len(lvu_list) + 6].style = custom_highlight_style.name

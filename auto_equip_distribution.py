@@ -7,6 +7,7 @@ and creating "Рознарядка" .xlsx file
 from openpyxl import load_workbook
 import utils
 from named_styles import header_style, data_style
+from decimal import Decimal
 # from operator import itemgetter
 import locale
 locale.setlocale(locale.LC_ALL, "")
@@ -93,7 +94,11 @@ utils.add_distribution_check_sum(distribution_ws,
                                  distribution_wb,
                                  data_style)
 
-# Highlight problems with check sums and units
-utils.highlight_problems(distribution_ws, lvu_list, positions_n_units_list, distribution_wb, header_style)
+# Highlight problems with check sums
+utils.check_n_highlight_sums(contract_ws, distribution_ws, lvu_list, distribution_wb, header_style)
+
+# Highlight problems with units
+utils.check_n_highlight_units(distribution_ws, lvu_list, distribution_wb, header_style)
+
 # Save distribution workbook
 distribution_wb.save(f'Рознарядка.xlsx')
