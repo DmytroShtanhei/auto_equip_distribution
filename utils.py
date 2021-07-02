@@ -4,6 +4,7 @@ for processing "Договір" and "Групування" .xlsx source files
 and creating "Рознарядка" .xlsx file
 """
 from decimal import Decimal
+from openpyxl.styles import PatternFill, Font
 
 
 def copy_table(source_ws, target_ws):
@@ -195,7 +196,7 @@ def populate_table_in_distribution_ws(distribution_ws, lvu_list, positions_n_uni
     """Populate distribution_ws with distribution data from distribution_full_list."""
     curr_lvu_list_index = 0
     for row in distribution_ws.iter_rows(min_row=3,
-                                         max_row=len(lvu_list)+2,
+                                         max_row=len(lvu_list) + 2,
                                          min_col=2,
                                          max_col=len(positions_n_units_list) + 2,
                                          ):
@@ -292,12 +293,35 @@ def add_distribution_check_sum(distribution_ws, grouping_ws, lvu_list, positions
     for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
         row[1].value = 'Рознарядка. Сумарна кількість:'
         row[1].style = custom_data_style.name
+        row[1].font = Font(bold=True)
         for i in range(2, len(positions_n_units_list) + 2):
             row[i].value = f'=SUM({row[i].column_letter}{3}:{row[i].column_letter}{len(lvu_list) + 2})'
             row[i].style = custom_data_style.name
+            row[i].font = Font(bold=True)
+
+    # Add check sum for contract
+    check_sum_row_index = len(lvu_list) + 6
+    for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
+        row[1].value = 'Договір. Сумарна кількість:'
+        row[1].style = custom_data_style.name
+        row[1].font = Font(bold=True)
+        for i in range(2, len(positions_n_units_list) + 2):
+            row[i].value = f'=Договір!P{i + 1}'
+            row[i].style = custom_data_style.name
+            row[i].font = Font(bold=True)
+    # Add units for contract check sum
+    check_sum_row_index = len(lvu_list) + 7
+    for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
+        row[1].value = 'Договір. Одиниці виміру:'
+        row[1].style = custom_data_style.name
+        row[1].font = Font(bold=True)
+        for i in range(2, len(positions_n_units_list) + 2):
+            row[i].value = f'=Договір!O{i + 1}'
+            row[i].style = custom_data_style.name
+            row[i].font = Font(bold=True)
 
     # Add check sum for grouping
-    check_sum_row_index = len(lvu_list) + 6
+    check_sum_row_index = len(lvu_list) + 9
     for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
         row[1].value = 'Групування. Сумарна кількість:'
         row[1].style = custom_data_style.name
@@ -307,7 +331,7 @@ def add_distribution_check_sum(distribution_ws, grouping_ws, lvu_list, positions
                            f')'
             row[i].style = custom_data_style.name
     # Add units for grouping check sum
-    check_sum_row_index = len(lvu_list) + 7
+    check_sum_row_index = len(lvu_list) + 10
     for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
         row[1].value = 'Групування. Одиниці виміру:'
         row[1].style = custom_data_style.name
@@ -315,32 +339,14 @@ def add_distribution_check_sum(distribution_ws, grouping_ws, lvu_list, positions
             row[i].value = get_units_for_position(grouping_ws, positions_n_units_list[i - 2][0])
             row[i].style = custom_data_style.name
 
-    # Add check sum for contract
-    check_sum_row_index = len(lvu_list) + 9
-    for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
-        row[1].value = 'Договір. Сумарна кількість:'
-        row[1].style = custom_data_style.name
-        for i in range(2, len(positions_n_units_list) + 2):
-            row[i].value = f'=Договір!P{i + 1}'
-            row[i].style = custom_data_style.name
-    # Add units for contract check sum
-    check_sum_row_index = len(lvu_list) + 10
-    for row in distribution_ws.iter_rows(min_row=check_sum_row_index, max_row=check_sum_row_index):
-        row[1].value = 'Договір. Одиниці виміру:'
-        row[1].style = custom_data_style.name
-        for i in range(2, len(positions_n_units_list) + 2):
-            row[i].value = f'=Договір!O{i + 1}'
-            row[i].style = custom_data_style.name
 
-
-def check_n_highlight_sums(contract_ws, distribution_ws, lvu_list, distribution_wb, custom_highlight_style):
-    """Highlight cells with check sums that don't correspond to contract sums"""
-    # Register custom Named Styles in the Workbook if they are not registered yet.
-    if custom_highlight_style.name not in distribution_wb.named_styles:
-        distribution_wb.add_named_style(custom_highlight_style)
-
+def check_n_highlight_distribution_sums(contract_ws,
+                                        distribution_ws,
+                                        lvu_list,
+                                        positions_n_units_list):
+    """Highlight cells with Distribution Check Sums that don't correspond to Contract Sums"""
     curr_position = 1
-    for col in distribution_ws.iter_cols(min_col=3):
+    for col in distribution_ws.iter_cols(min_col=3, max_col=len(positions_n_units_list) + 2):
         # Get Distribution Check Sum for Position from Distribution Table
         distribution_sum = 0
         for i in range(2, len(lvu_list) + 2):
@@ -359,18 +365,52 @@ def check_n_highlight_sums(contract_ws, distribution_ws, lvu_list, distribution_
 
         # Highlight distribution sums that don't correspond to contract units
         if distribution_sum != contract_sum:
-            col[len(lvu_list) + 3].style = custom_highlight_style.name
+            col[len(lvu_list) + 3].fill = PatternFill(fill_type='solid', start_color='00FF0000')
+
+            distribution_ws.cell(len(lvu_list) + 4, len(positions_n_units_list) + 3).value = \
+                ' <- Сумарна кількість не відповідає Договору (можливі причини див. нижче)'
+            distribution_ws.cell(len(lvu_list) + 4, len(positions_n_units_list) + 3).font = Font(color='00FF0000')
 
 
-def check_n_highlight_units(distribution_ws, lvu_list, distribution_wb, custom_highlight_style):
-    """Highlight cells with units that don't correspond to contract units"""
-    # Register custom Named Styles in the Workbook if they are not registered yet.
-    if custom_highlight_style.name not in distribution_wb.named_styles:
-        distribution_wb.add_named_style(custom_highlight_style)
+def check_n_highlight_grouping_sums(distribution_ws,
+                                    contract_ws,
+                                    grouping_copied_ws,
+                                    lvu_list,
+                                    positions_n_units_list):
+    """Highlight cells with Grouping sums that don't correspond to Contract sums"""
+    curr_position = 1
+    for col in distribution_ws.iter_cols(min_col=3, max_col=len(positions_n_units_list) + 2):
+        # Get Grouping Check Sum for Position from Grouping Table (Grouping worksheet)
+        grouping_sum = 0
+        for row in grouping_copied_ws.rows:
+            if row[12].value == curr_position:
+                grouping_sum += Decimal(str(row[3].value))
 
-    for col in distribution_ws.iter_cols(min_col=3):
-        grouping_units = col[len(lvu_list) + 6].value
+        # Get Contract Sum for Position from Contract Table
+        row_index = curr_position + 2
+        contract_sum = Decimal(str(contract_ws[f'P{row_index}'].value))
+
+        curr_position += 1
+
+        # Highlight Grouping Sums that don't correspond to Contract Sums
+        if grouping_sum != contract_sum:
+            col[len(lvu_list) + 8].fill = PatternFill(fill_type='solid', start_color='00FF9900')
+
+            distribution_ws.cell(len(lvu_list) + 9, len(positions_n_units_list) + 3).value = \
+                ' <- Сумарна кількість не відповідає Договору. Відкоригуйте ФАЙЛ "Групування.xlsx"'
+            distribution_ws.cell(len(lvu_list) + 9, len(positions_n_units_list) + 3).font = Font(color='00FF9900')
+
+
+def check_n_highlight_grouping_units(distribution_ws,
+                                     lvu_list,
+                                     positions_n_units_list):
+    """Highlight cells with Grouping units that don't correspond to Contract units"""
+    for col in distribution_ws.iter_cols(min_col=3, max_col=len(positions_n_units_list) + 2):
+        grouping_units = col[len(lvu_list) + 9].value
         distribution_units = col[1].value
         # Highlight grouping units that don't correspond to contract units
         if grouping_units.strip().lower() != distribution_units.strip().lower():
-            col[len(lvu_list) + 6].style = custom_highlight_style.name
+            col[len(lvu_list) + 9].fill = PatternFill(fill_type='solid', start_color='00FF9900')
+            distribution_ws.cell(len(lvu_list) + 10, len(positions_n_units_list) + 3).value = \
+                ' <- Одиниці виміру не відповідають Договору'
+            distribution_ws.cell(len(lvu_list) + 10, len(positions_n_units_list) + 3).font = Font(color='00FF9900')

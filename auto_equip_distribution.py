@@ -7,9 +7,9 @@ and creating "Рознарядка" .xlsx file
 from openpyxl import load_workbook
 import utils
 from named_styles import header_style, data_style
-from decimal import Decimal
 # from operator import itemgetter
 import locale
+
 locale.setlocale(locale.LC_ALL, "")
 
 distribution_wb = load_workbook(filename='Рознарядка.xlsx')
@@ -56,7 +56,6 @@ distribution_full_list = utils.get_distribution_full_list(positions_n_units_list
 # Replace LVU codes in distribution_full_list with LVU names
 utils.replace_lvu_codes_with_names(distribution_full_list)
 
-
 # distribution_full_list_sorted_by_lvu = sorted(distribution_full_list, key=itemgetter(0))
 
 # Sort rows by LVU
@@ -94,11 +93,23 @@ utils.add_distribution_check_sum(distribution_ws,
                                  distribution_wb,
                                  data_style)
 
-# Highlight problems with check sums
-utils.check_n_highlight_sums(contract_ws, distribution_ws, lvu_list, distribution_wb, header_style)
+# Highlight problems with Distribution check sums
+utils.check_n_highlight_distribution_sums(contract_ws,
+                                          distribution_ws,
+                                          lvu_list,
+                                          positions_n_units_list)
+
+# Highlight problems with Grouping check sums
+utils.check_n_highlight_grouping_sums(distribution_ws,
+                                      contract_ws,
+                                      grouping_copied_ws,
+                                      lvu_list,
+                                      positions_n_units_list)
 
 # Highlight problems with units
-utils.check_n_highlight_units(distribution_ws, lvu_list, distribution_wb, header_style)
+utils.check_n_highlight_grouping_units(distribution_ws,
+                                       lvu_list,
+                                       positions_n_units_list)
 
 # Save distribution workbook
 distribution_wb.save(f'Рознарядка.xlsx')
