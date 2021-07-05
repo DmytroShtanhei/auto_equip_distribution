@@ -3,6 +3,7 @@ Utility functions
 for processing "Договір" and "Групування" .xlsx source files
 and creating "Рознарядка" .xlsx file
 """
+from openpyxl.cell import *
 from decimal import Decimal
 from openpyxl.styles import PatternFill, Font
 
@@ -60,6 +61,25 @@ def get_lvu_list(grouping_ws):
                 distribution_lvu_list.append(val)
 
     return sorted(list(set(distribution_lvu_list)))
+
+
+def check_grouping_positions(contract_ws, original_grouping_ws):
+    """Compare positions in Original Grouping Workbook with positions in Contract Worksheet"""
+    pass
+    # Get Contract positions set
+    for col in contract_ws.iter_cols(min_row=3, max_col=1, values_only=True):
+        contract_pos_set = set()
+        for cell in col:
+            contract_pos_set.add(cell)
+        print(contract_pos_set)
+
+    # Get Original Grouping position set
+    for col in original_grouping_ws.iter_cols(min_row=5, min_col=13, max_col=13, values_only=False):
+        grouping_pos_set = set()
+        for cell in col:
+            if not isinstance(cell, MergedCell):
+                grouping_pos_set.add(cell.value)
+        print(grouping_pos_set)
 
 
 def get_lvu_list_for_position(grouping_ws, position):
@@ -250,7 +270,7 @@ def style_table_in_worksheet(workbook, worksheet, custom_header_style, custom_da
     worksheet.column_dimensions['B'].width = 37 + 2
 
 
-def get_quantity_cell_range_for_position(grouping_ws, position):
+def get_quantity_sum_formula_for_position(grouping_ws, position):
     """
     Get string that represents range of cells (in form like this: 'D5:D100')
     with quantity needed for given position.
@@ -260,8 +280,10 @@ def get_quantity_cell_range_for_position(grouping_ws, position):
         for cell in col:
             if cell.value == position:
                 row_range_index_list.append(cell.row)
-
-    return f'D{min(row_range_index_list)}:D{max(row_range_index_list)}'
+    if not row_range_index_list:
+        return '0'
+    else:
+        return f'=SUM(Групування!D{min(row_range_index_list)}:D{max(row_range_index_list)})'
 
 
 def get_units_for_position(grouping_ws, position):
@@ -326,9 +348,7 @@ def add_distribution_check_sum(distribution_ws, grouping_ws, lvu_list, positions
         row[1].value = 'Групування. Сумарна кількість:'
         row[1].style = custom_data_style.name
         for i in range(2, len(positions_n_units_list) + 2):
-            row[i].value = f'=SUM(Групування!' \
-                           f'{get_quantity_cell_range_for_position(grouping_ws, positions_n_units_list[i - 2][0])}' \
-                           f')'
+            row[i].value = get_quantity_sum_formula_for_position(grouping_ws, positions_n_units_list[i - 2][0])
             row[i].style = custom_data_style.name
     # Add units for grouping check sum
     check_sum_row_index = len(lvu_list) + 10
