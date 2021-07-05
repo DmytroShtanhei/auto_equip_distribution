@@ -3,7 +3,6 @@ Utility functions
 for processing "Договір" and "Групування" .xlsx source files
 and creating "Рознарядка" .xlsx file
 """
-from openpyxl.cell import *
 from decimal import Decimal
 from openpyxl.styles import PatternFill, Font
 

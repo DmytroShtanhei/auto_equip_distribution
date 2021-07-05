@@ -3,11 +3,9 @@ Script
 for processing "Договір" and "Групування" .xlsx source files
 and creating "Рознарядка" .xlsx file
 """
-
 from openpyxl import load_workbook
 import utils
 from named_styles import header_style, data_style
-# from operator import itemgetter
 import locale
 
 locale.setlocale(locale.LC_ALL, "")
