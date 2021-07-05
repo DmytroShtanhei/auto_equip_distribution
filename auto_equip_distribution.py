@@ -37,8 +37,8 @@ if 'Рознарядка' in distribution_wb:
 
 distribution_ws = distribution_wb.create_sheet('Рознарядка')
 
-# Check Contract positions in original Grouping
-utils.check_grouping_positions(contract_ws, original_grouping_ws)
+# # Check Contract positions in original Grouping
+# utils.check_grouping_positions(contract_ws, original_grouping_ws)
 
 # Get list of positions from Contract table
 positions_n_units_list = utils.get_positions_n_units_list(contract_ws)

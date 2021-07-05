@@ -36,12 +36,6 @@ def prepare_grouping_table(grouping_ws_to_be_prepared):
 
 def get_positions_n_units_list(contract_ws):
     """Get position list from contract spreadsheet."""
-    # contract_position_n_units_list = []
-    # for col in contract_ws.iter_cols(min_row=3, max_col=1, values_only=True):
-    #     for val in col:
-    #         if val is not None:
-    #             contract_position_n_units_list.append(val)
-
     contract_positions_n_units_list = []
     for row in contract_ws.rows:
         index_row = row[0].row
@@ -63,23 +57,23 @@ def get_lvu_list(grouping_ws):
     return sorted(list(set(distribution_lvu_list)))
 
 
-def check_grouping_positions(contract_ws, original_grouping_ws):
-    """Compare positions in Original Grouping Workbook with positions in Contract Worksheet"""
-    pass
-    # Get Contract positions set
-    for col in contract_ws.iter_cols(min_row=3, max_col=1, values_only=True):
-        contract_pos_set = set()
-        for cell in col:
-            contract_pos_set.add(cell)
-        print(contract_pos_set)
-
-    # Get Original Grouping position set
-    for col in original_grouping_ws.iter_cols(min_row=5, min_col=13, max_col=13, values_only=False):
-        grouping_pos_set = set()
-        for cell in col:
-            if not isinstance(cell, MergedCell):
-                grouping_pos_set.add(cell.value)
-        print(grouping_pos_set)
+# def check_grouping_positions(contract_ws, original_grouping_ws):
+#     """Compare positions in Original Grouping Workbook with positions in Contract Worksheet"""
+#     pass
+#     # Get Contract positions set
+#     for col in contract_ws.iter_cols(min_row=3, max_col=1, values_only=True):
+#         contract_pos_set = set()
+#         for cell in col:
+#             contract_pos_set.add(cell)
+#         print(contract_pos_set)
+#
+#     # Get Original Grouping position set
+#     for col in original_grouping_ws.iter_cols(min_row=5, min_col=13, max_col=13, values_only=False):
+#         grouping_pos_set = set()
+#         for cell in col:
+#             if not isinstance(cell, MergedCell):
+#                 grouping_pos_set.add(cell.value)
+#         print(grouping_pos_set)
 
 
 def get_lvu_list_for_position(grouping_ws, position):
@@ -281,7 +275,7 @@ def get_quantity_sum_formula_for_position(grouping_ws, position):
             if cell.value == position:
                 row_range_index_list.append(cell.row)
     if not row_range_index_list:
-        return '0'
+        return 'поз. відс.'
     else:
         return f'=SUM(Групування!D{min(row_range_index_list)}:D{max(row_range_index_list)})'
 

@@ -1,7 +1,6 @@
 # Project related source files
 source_xl
-Рознарядка.xlsx
-Групування.xlsx
+*.xlsx
 
 # IDE files
 .idea
