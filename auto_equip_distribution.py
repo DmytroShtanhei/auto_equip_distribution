@@ -1,7 +1,7 @@
 """
 Script
-for processing "Договір" and "Групування" .xlsx source files
-and creating "Рознарядка" .xlsx file
+for processing spreadsheet "Договір" (of file "Рознарядка.xlsx") and file "Групування.xlsx"
+and adding new spreadsheets "Групування" and "Рознарядка" (to file "Рознарядка.xlsx")
 """
 from openpyxl import load_workbook
 import utils

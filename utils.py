@@ -422,7 +422,7 @@ def check_n_highlight_grouping_units(distribution_ws,
         grouping_units = col[len(lvu_list) + 9].value
         distribution_units = col[1].value
         # Highlight grouping units that don't correspond to contract units
-        if grouping_units.strip().lower() != distribution_units.strip().lower():
+        if grouping_units.strip(',').lower() != distribution_units.strip(',').lower():
             col[len(lvu_list) + 9].fill = PatternFill(fill_type='solid', start_color='00FF9900')
             distribution_ws.cell(len(lvu_list) + 10, len(positions_n_units_list) + 3).value = \
                 ' <- Одиниці виміру не відповідають Договору'
