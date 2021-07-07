@@ -6,6 +6,7 @@ and creating "Рознарядка" .xlsx file
 import copy
 from decimal import Decimal
 from openpyxl.styles import PatternFill, Font
+import locale
 
 
 def copy_table(source_ws, target_ws):
@@ -421,6 +422,42 @@ def get_extend_distribution_full_list(distribution_full_list, lvu_names_list):
     return distribution_full_list_extended
 
 
-def form_grouped_by_region_list(distribution_by_region_ws, distribution_full_list_extended):
+def get_distribution_list_for_region(distribution_full_list_extended, region_name):
+    """Get Distribution list for given region"""
+    # Form Distribution list for given region
+    distribution_one_region_list = []
+    for lvu_sums in distribution_full_list_extended:
+        if lvu_sums[-1] == region_name:
+            distribution_one_region_list.append(lvu_sums)
+    distribution_one_region_list_sorted = sorted(distribution_one_region_list,
+                                                 key=lambda item: (locale.strxfrm(item[0])))
+
+    # Form empty lvu_sums with name of region as first item
+    empty_lvu_sums = [region_name]
+    for item in range(len(distribution_full_list_extended[0]) - 1):
+        empty_lvu_sums.append('')
+
+    # Append Distribution list for given region with empty lvu_sums
+    distribution_one_region_list_sorted.append(empty_lvu_sums)
+
+    return distribution_one_region_list_sorted
+
+
+def form_grouped_by_region_list(distribution_full_list_extended):
     """Form list of Distribution Lists grouped by regions"""
-    pass
+    # Get set of regions
+    grouped_by_region_list = []
+    regions_list = []
+    for lvu_sums in distribution_full_list_extended:
+        regions_list.append(lvu_sums[-1])
+    regions_set = set(regions_list)
+
+    # Group LVU list by region
+    for region in regions_set:
+        the_region_distribution_list = get_distribution_list_for_region(distribution_full_list_extended, region)
+        grouped_by_region_list.extend(the_region_distribution_list)
+        # grouped_by_region_list.extend
+
+    print(*grouped_by_region_list, sep='\n')
+    return grouped_by_region_list
+

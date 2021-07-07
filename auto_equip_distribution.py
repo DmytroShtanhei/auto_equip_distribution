@@ -118,11 +118,8 @@ utils.check_n_highlight_grouping_units(distribution_ws,
 distribution_full_list_extended = utils.get_extend_distribution_full_list(distribution_full_list,
                                                                           lvu_names.lvu_names_list)
 
-# Get Distribution list for given region (TODO move to utils)
-# utils.get_distribution_list_for_region(distribution_full_list_extended, region_name)
-
 # Form list of Distribution Lists grouped by regions
-# utils.form_grouped_by_region_list(distribution_by_region_ws, distribution_full_list_extended)
+utils.form_grouped_by_region_list(distribution_full_list_extended)
 
 # Save distribution workbook
 distribution_wb.save(f'Рознарядка.xlsx')
