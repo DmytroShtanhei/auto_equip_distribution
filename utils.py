@@ -3,6 +3,7 @@ Utility functions
 for processing "Договір" and "Групування" .xlsx source files
 and creating "Рознарядка" .xlsx file
 """
+import copy
 from decimal import Decimal
 from openpyxl.styles import PatternFill, Font
 
@@ -133,33 +134,8 @@ def get_distribution_full_list(positions_n_units_list, lvu_list, distribution_da
     return distribution_full_list
 
 
-def replace_lvu_codes_with_names(distribution_full_list):
-    """Replace codes in distribution_full_list with names from lvu_names_dict."""
-    # LVU names dictionary
-    lvu_names_list = [
-        ['7001', 'ТОВ «ОГТСУ» апарат', 'ТОВ «ОГТСУ» апарат', 'ТОВ «ОГТСУ» апарат'],
-        ['7102', 'Харківське ЛВУМГ', 'Харківське ЛВУМГ', 'СХІД'],
-        ['7103', 'Запорізьке ЛВУМГ', 'Запорізьке ЛВУМГ',  'СХІД'],
-        ['7104', 'Криворізьке ЛВУМГ', 'Запорізьке ЛВУМГ (Криворізьке)', 'СХІД'],
-        ['7105', 'Миколаївське ЛВУМГ', 'Миколаївське ЛВУМГ', 'СХІД'],
-        ['7106', 'Краматорське ЛВУМГ', 'Краматорське ЛВУМГ', 'СХІД'],
-        ['7107', 'Сєвєродонецьке ЛВУМГ', 'Краматорське ЛВУМГ (Сєвєродонецьке)', 'СХІД'],
-        ['7202', 'Кременчуцьке ЛВУМГ', 'Кременчуцьке ЛВУМГ', 'ЦЕНТР'],
-        ['7203', 'Золотоніське ЛВУМГ', 'Золотоніське ЛВУМГ', 'ЦЕНТР'],
-        ['7204', 'Барське ЛВУМГ', 'Золотоніське ЛВУМГ (Барське)', 'ЦЕНТР'],
-        ['7205', 'Одеське ЛВУМГ', 'Миколаївське ЛВУМГ(Одеське)', 'ЦЕНТР'],
-        ['7302', 'Сумське ЛВУМГ', 'Сумське ЛВУМГ', 'ПІВНІЧ'],
-        ['7304', 'Лубенське ЛВУМГ', 'Лубенське ЛВУМГ', 'ПІВНІЧ'],
-        ['7305', 'Боярське ЛВУМГ', 'Боярське ЛВУМГ', 'ПІВНІЧ'],
-        ['7306', 'Бердичівське ЛВУМГ', 'Бердичівське ЛВУМГ', 'ПІВНІЧ'],
-        ['7402', 'Богородчанське ЛВУМГ', 'Богородчанське ЛВУМГ', 'ЗАХІД'],
-        ['7403', 'Долинське ЛВУМГ', 'Богородчанське ЛВУМГ (Долинське)', 'ЗАХІД'],
-        ['7404', 'Закарпатське ЛВУМГ', 'Закарпатське ЛВУМГ', 'ЗАХІД'],
-        ['7405', 'Бібрське ЛВУМГ', 'Бібрське ЛВУМГ', 'ЗАХІД'],
-        ['7406', 'Рівненське ЛВУМГ', 'Бібрське ЛВУМГ (Рівненське)', 'ЗАХІД'],
-        ['7502', 'ОРУ', 'ОРУ', 'ОРУ']
-    ]
-
+def replace_lvu_codes_with_names(distribution_full_list, lvu_names_list):
+    """Replace codes in distribution_full_list with names from lvu_names_list."""
     for curr_lvu_list in distribution_full_list:
         curr_lvu_code = str(curr_lvu_list[0])
         for item in lvu_names_list:
@@ -430,3 +406,21 @@ def check_n_highlight_grouping_units(distribution_ws,
             distribution_ws.cell(len(lvu_list) + 10, len(positions_n_units_list) + 3).value = \
                 ' <- Одиниці виміру не відповідають Договору'
             distribution_ws.cell(len(lvu_list) + 10, len(positions_n_units_list) + 3).font = Font(color='00FF9900')
+
+
+def get_extend_distribution_full_list(distribution_full_list, lvu_names_list):
+    """Extend distribution full list with information about the region for each LVU"""
+    distribution_full_list_extended = copy.deepcopy(distribution_full_list)
+    for lvu_sums in distribution_full_list_extended:
+        lvu_sums_name = lvu_sums[0]
+        for lvu_names in lvu_names_list:
+            lvu_names_name = lvu_names[2]
+            if lvu_sums_name == lvu_names_name:
+                lvu_sums.append(lvu_names[3])
+
+    return distribution_full_list_extended
+
+
+def form_grouped_by_region_list(distribution_by_region_ws, distribution_full_list_extended):
+    """Form list of Distribution Lists grouped by regions"""
+    pass

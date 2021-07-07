@@ -4,6 +4,7 @@ for processing spreadsheet "Договір" (of file "Рознарядка.xlsx"
 and adding new spreadsheets "Групування" and "Рознарядка" (to file "Рознарядка.xlsx")
 """
 from openpyxl import load_workbook
+import lvu_names
 import utils
 from named_styles import header_style, data_style
 import locale
@@ -55,7 +56,7 @@ distribution_full_list = utils.get_distribution_full_list(positions_n_units_list
                                                           )
 
 # Replace LVU codes in distribution_full_list with LVU names
-utils.replace_lvu_codes_with_names(distribution_full_list)
+utils.replace_lvu_codes_with_names(distribution_full_list, lvu_names.lvu_names_list)
 
 # distribution_full_list_sorted_by_lvu = sorted(distribution_full_list, key=itemgetter(0))
 
@@ -111,6 +112,17 @@ utils.check_n_highlight_grouping_sums(distribution_ws,
 utils.check_n_highlight_grouping_units(distribution_ws,
                                        lvu_list,
                                        positions_n_units_list)
+
+# ---------------- Create datasheet with Distribution list grouped by Regions ----------------
+# Extend distribution full list with information about the region for each LVU
+distribution_full_list_extended = utils.get_extend_distribution_full_list(distribution_full_list,
+                                                                          lvu_names.lvu_names_list)
+
+# Get Distribution list for given region (TODO move to utils)
+# utils.get_distribution_list_for_region(distribution_full_list_extended, region_name)
+
+# Form list of Distribution Lists grouped by regions
+# utils.form_grouped_by_region_list(distribution_by_region_ws, distribution_full_list_extended)
 
 # Save distribution workbook
 distribution_wb.save(f'Рознарядка.xlsx')
