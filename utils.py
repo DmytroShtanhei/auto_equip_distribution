@@ -145,7 +145,7 @@ def replace_lvu_codes_with_names(distribution_full_list, lvu_names_list):
                 curr_lvu_list[0] = lvu_names_list[i][2]
 
 
-def init_table_in_distribution_ws(positions_n_units_list, lvu_list, distribution_ws):
+def create_header_for_distribution_ws(positions_n_units_list, distribution_ws):
     """
     Create header for distribution spreadsheet in form of asked table:
     lvu | sum_for_pos_1 | ... | sum_for_pos_n
@@ -173,35 +173,74 @@ def init_table_in_distribution_ws(positions_n_units_list, lvu_list, distribution
             cell.value = positions_n_units_list[p][1]
             p += 1
 
-    # Populate Number in order column
-    for col in distribution_ws.iter_cols(max_col=1, min_row=3, max_row=len(lvu_list) + 2):
-        num_in_order = 1
-        for cell in col:
-            cell.value = num_in_order
-            num_in_order += 1
-
     # Merge appropriate cells
     distribution_ws.merge_cells('A1:A2')
     distribution_ws.merge_cells('B1:B2')
 
 
-def populate_table_in_distribution_ws(distribution_ws, lvu_list, positions_n_units_list, distribution_full_list):
-    """Populate distribution_ws with distribution data from distribution_full_list."""
-    curr_lvu_list_index = 0
-    for row in distribution_ws.iter_rows(min_row=3,
-                                         max_row=len(lvu_list) + 2,
-                                         min_col=2,
-                                         max_col=len(positions_n_units_list) + 2,
-                                         ):
-        curr_item_in_lvu_list_index = 0
-        for cell in row:
-            value = distribution_full_list[curr_lvu_list_index][curr_item_in_lvu_list_index]
-            if value == 0:
-                cell.value = None
-            else:
-                cell.value = value
-            curr_item_in_lvu_list_index += 1
-        curr_lvu_list_index += 1
+# def init_table_in_distribution_ws(positions_n_units_list, lvu_list, distribution_ws):
+#     """
+#     Create header for distribution spreadsheet in form of asked table:
+#     lvu | sum_for_pos_1 | ... | sum_for_pos_n
+#     """
+#     # Initialise header list
+#     distribution_header_list = [
+#         '№ п-п',
+#         'Назва ЛВУМГ (ЛВУМГ що замовляло)',
+#     ]
+#     # Append positions to header list
+#     for item in positions_n_units_list:
+#         distribution_header_list.append(item[0])
+#
+#     # Populate distribution_ws header row
+#     for row in distribution_ws.iter_rows(max_row=1, max_col=len(distribution_header_list)):
+#         p = 0
+#         for cell in row:
+#             cell.value = distribution_header_list[p]
+#             p += 1
+#
+#     # Populate units row
+#     for row in distribution_ws.iter_rows(min_row=2, max_row=2, min_col=3, max_col=len(positions_n_units_list) + 2):
+#         p = 0
+#         for cell in row:
+#             cell.value = positions_n_units_list[p][1]
+#             p += 1
+#
+#     # Populate Number in order column
+#     for col in distribution_ws.iter_cols(max_col=1, min_row=3, max_row=len(lvu_list) + 2):
+#         num_in_order = 1
+#         for cell in col:
+#             cell.value = num_in_order
+#             num_in_order += 1
+#
+#     # Merge appropriate cells
+#     distribution_ws.merge_cells('A1:A2')
+#     distribution_ws.merge_cells('B1:B2')
+
+
+def append_list_to_worksheet(list_of_data,
+                             worksheet):
+    """Add data from List of Data to Worksheet."""
+    for row in list_of_data:
+        worksheet.append(row)
+
+
+# def populate_table_in_distribution_ws(distribution_ws, lvu_list, positions_n_units_list, distribution_full_list):
+#     """Populate distribution_ws with distribution data from distribution_full_list."""
+#     curr_lvu_list_index = 0
+#     for row in distribution_ws.iter_rows(min_row=3,
+#                                          max_row=len(lvu_list) + 2,
+#                                          max_col=len(positions_n_units_list) + 2,
+#                                          ):
+#         curr_item_in_lvu_list_index = 0
+#         for cell in row:
+#             value = distribution_full_list[curr_lvu_list_index][curr_item_in_lvu_list_index]
+#             if value == 0:
+#                 cell.value = None
+#             else:
+#                 cell.value = value
+#             curr_item_in_lvu_list_index += 1
+#         curr_lvu_list_index += 1
 
 
 # def auto_adjust_col_width(worksheet):
@@ -423,7 +462,12 @@ def get_extend_distribution_full_list(distribution_full_list, lvu_names_list):
 
 
 def get_distribution_list_for_region(distribution_full_list_extended, region_name):
-    """Get Distribution list for given region"""
+    """
+    Form Distribution list for given region,
+    add numbers by order,
+    add row with totals per position,
+    add empty row for nicer look :)
+    """
     # Form Distribution list for given region
     distribution_one_region_list = []
     for lvu_sums in distribution_full_list_extended:
@@ -468,13 +512,13 @@ def form_grouped_by_region_list(distribution_full_list_extended):
     regions_list = []
     for lvu_sums in distribution_full_list_extended:
         regions_list.append(lvu_sums[-1])
-    regions_set = set(regions_list)
+    regions_list_sorted = sorted(list(set(regions_list)))
 
     # Group LVU list by region
-    for region in regions_set:
+    for region in regions_list_sorted:
         the_region_distribution_list = get_distribution_list_for_region(distribution_full_list_extended, region)
         grouped_by_region_list.extend(the_region_distribution_list)
         # grouped_by_region_list.extend
 
-    print(*grouped_by_region_list, sep='\n')
+    # print(*grouped_by_region_list, sep='\n')
     return grouped_by_region_list

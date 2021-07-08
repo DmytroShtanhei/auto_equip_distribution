@@ -3,6 +3,7 @@ Script
 for processing spreadsheet "Договір" (of file "Рознарядка.xlsx") and file "Групування.xlsx"
 and adding new spreadsheets "Групування" and "Рознарядка" (to file "Рознарядка.xlsx")
 """
+import copy
 from openpyxl import load_workbook
 import lvu_names
 import utils
@@ -17,7 +18,6 @@ contract_ws = distribution_wb['Договір']
 original_grouping_wb = load_workbook(filename='Групування.xlsx')
 original_grouping_ws = original_grouping_wb.active
 
-# Copy the original grouping_ws to distribution_wb and prepare
 if 'Групування' in distribution_wb:
     del distribution_wb['Групування']
 
@@ -31,10 +31,10 @@ utils.style_table_in_worksheet(workbook=distribution_wb,
                                max_header_row=4,
                                )
 
-if 'Рознарядка' in distribution_wb:
-    del distribution_wb['Рознарядка']
+if 'Рознарядка. Перевірка' in distribution_wb:
+    del distribution_wb['Рознарядка. Перевірка']
 
-distribution_ws = distribution_wb.create_sheet('Рознарядка')
+distribution_ws = distribution_wb.create_sheet('Рознарядка. Перевірка')
 
 # # Check Contract positions in original Grouping
 # utils.check_grouping_positions(contract_ws, original_grouping_ws)
@@ -64,19 +64,21 @@ utils.replace_lvu_codes_with_names(distribution_full_list, lvu_names.lvu_names_l
 # great explanation is here: https://stackoverflow.com/questions/36770509/sorting-with-two-key-arguments
 # (strxfrm() is used for locale aware sorting)
 distribution_full_list_sorted_by_lvu = sorted(distribution_full_list, key=lambda item: (locale.strxfrm(item[0])))
+# Insert Numbers by Order as first item for each row
+distribution_full_list_sorted_by_lvu_with_nbo = copy.deepcopy(distribution_full_list_sorted_by_lvu)
+counter = 1
+for item in distribution_full_list_sorted_by_lvu_with_nbo:
+    item.insert(0, counter)
+    counter += 1
+# print(*distribution_full_list_sorted_by_lvu, sep='\n')
 
-# Create header and first column (numbers in order) for distribution spreadsheet
-utils.init_table_in_distribution_ws(positions_n_units_list,
-                                    lvu_list,
-                                    distribution_ws,
-                                    )
+# Create header for distribution spreadsheet
+utils.create_header_for_distribution_ws(positions_n_units_list,
+                                        distribution_ws)
 
 # Populate distribution_ws with distribution data from distribution_full_list
-utils.populate_table_in_distribution_ws(distribution_ws,
-                                        lvu_list,
-                                        positions_n_units_list,
-                                        distribution_full_list_sorted_by_lvu,
-                                        )
+utils.append_list_to_worksheet(distribution_full_list_sorted_by_lvu_with_nbo,
+                               distribution_ws)
 
 # Style the table in distribution spreadsheet
 utils.style_table_in_worksheet(workbook=distribution_wb,
@@ -113,13 +115,37 @@ utils.check_n_highlight_grouping_units(distribution_ws,
                                        lvu_list,
                                        positions_n_units_list)
 
-# ---------------- Create datasheet with Distribution list grouped by Regions ----------------
+
+# ---------------- Create Datasheet with Distribution list grouped by Regions ----------------
+
 # Extend distribution full list with information about the region for each LVU
 distribution_full_list_extended = utils.get_extend_distribution_full_list(distribution_full_list,
                                                                           lvu_names.lvu_names_list)
 
 # Form list of Distribution Lists grouped by regions
-utils.form_grouped_by_region_list(distribution_full_list_extended)
+grouped_by_region_list_with_nbo = utils.form_grouped_by_region_list(distribution_full_list_extended)
 
+# Create new list 'Рознарядка по регіонах' in distribution_wb
+if 'Рознарядка по регіонах' in distribution_wb:
+    del distribution_wb['Рознарядка по регіонах']
+distribution_by_region_ws = distribution_wb.create_sheet('Рознарядка по регіонах')
+
+# Create header for Distribution by Regions spreadsheet
+utils.create_header_for_distribution_ws(positions_n_units_list,
+                                        distribution_by_region_ws)
+
+# Populate distribution_ws with distribution data from distribution_full_list
+utils.append_list_to_worksheet(grouped_by_region_list_with_nbo,
+                               distribution_by_region_ws)
+
+# Style table in Distribution by Region Worksheet
+utils.style_table_in_worksheet(workbook=distribution_wb,
+                               worksheet=distribution_by_region_ws,
+                               custom_header_style=header_style,
+                               custom_data_style=data_style,
+                               max_header_row=2)
+
+# Make given sheet active
+distribution_wb.active = distribution_wb['Рознарядка. Перевірка']
 # Save distribution workbook
 distribution_wb.save(f'Рознарядка.xlsx')
