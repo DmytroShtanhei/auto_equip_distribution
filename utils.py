@@ -430,14 +430,32 @@ def get_distribution_list_for_region(distribution_full_list_extended, region_nam
         if lvu_sums[-1] == region_name:
             distribution_one_region_list.append(lvu_sums)
     distribution_one_region_list_sorted = sorted(distribution_one_region_list,
-                                                 key=lambda item: (locale.strxfrm(item[0])))
+                                                 key=lambda element: (locale.strxfrm(element[0])))
 
-    # Form empty lvu_sums with name of region as first item
-    empty_lvu_sums = [region_name]
-    for item in range(len(distribution_full_list_extended[0]) - 1):
+    # Prepend numbers by order
+    counter = 1
+    for lvu_sums in distribution_one_region_list_sorted:
+        lvu_sums.insert(0, counter)
+        counter += 1
+
+    # Form row with total numbers per position with name of region as second item
+    total_per_position_list = ['', region_name]
+    for i in range(len(distribution_one_region_list_sorted[0]) - 3):
+
+        # Get total for given position (i + 2)
+        total = 0
+        for item in distribution_one_region_list_sorted:
+            total += item[i + 2]
+
+        total_per_position_list.append(total)
+
+    # Form empty lvu_sums
+    empty_lvu_sums = []
+    for i in range(len(distribution_one_region_list_sorted[0])):
         empty_lvu_sums.append('')
 
     # Append Distribution list for given region with empty lvu_sums
+    distribution_one_region_list_sorted.append(total_per_position_list)
     distribution_one_region_list_sorted.append(empty_lvu_sums)
 
     return distribution_one_region_list_sorted
@@ -460,4 +478,3 @@ def form_grouped_by_region_list(distribution_full_list_extended):
 
     print(*grouped_by_region_list, sep='\n')
     return grouped_by_region_list
-
