@@ -23,6 +23,7 @@ if 'Групування' in distribution_wb:
 
 grouping_copied_ws = distribution_wb.create_sheet('Групування')
 utils.copy_table(source_ws=original_grouping_ws, target_ws=grouping_copied_ws)
+# TODO customize header (merge appropriate cells)
 utils.prepare_grouping_table(grouping_ws_to_be_prepared=grouping_copied_ws)
 utils.style_table_in_worksheet(workbook=distribution_wb,
                                worksheet=grouping_copied_ws,
@@ -63,7 +64,7 @@ utils.replace_lvu_codes_with_names(distribution_full_list, lvu_names.lvu_names_l
 # Sort rows by LVU
 # great explanation is here: https://stackoverflow.com/questions/36770509/sorting-with-two-key-arguments
 # (strxfrm() is used for locale aware sorting)
-distribution_full_list_sorted_by_lvu = sorted(distribution_full_list, key=lambda item: (locale.strxfrm(item[0])))
+distribution_full_list_sorted_by_lvu = sorted(distribution_full_list, key=lambda element: (locale.strxfrm(element[0])))
 # Insert Numbers by Order as first item for each row
 distribution_full_list_sorted_by_lvu_with_nbo = copy.deepcopy(distribution_full_list_sorted_by_lvu)
 counter = 1
@@ -144,6 +145,9 @@ utils.style_table_in_worksheet(workbook=distribution_wb,
                                custom_header_style=header_style,
                                custom_data_style=data_style,
                                max_header_row=2)
+
+# TODO Add Function for customizing distribution_by_region_ws:
+#  custom styles for Total sums rows
 
 # Make given sheet active
 distribution_wb.active = distribution_wb['Рознарядка. Перевірка']

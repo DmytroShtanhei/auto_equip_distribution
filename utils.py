@@ -20,8 +20,7 @@ def copy_table(source_ws, target_ws):
         source_table_as_list.append(row_as_list)
 
     # Paste table as a list to target worksheet
-    for row in source_table_as_list:
-        target_ws.append(row)
+    append_list_to_worksheet(source_table_as_list, target_ws)
 
 
 def prepare_grouping_table(grouping_ws_to_be_prepared):
@@ -518,7 +517,12 @@ def form_grouped_by_region_list(distribution_full_list_extended):
     for region in regions_list_sorted:
         the_region_distribution_list = get_distribution_list_for_region(distribution_full_list_extended, region)
         grouped_by_region_list.extend(the_region_distribution_list)
-        # grouped_by_region_list.extend
 
+    # Get rid of last element with information about the region for each LVU
+    extended_length = len(grouped_by_region_list[0])
+    for lvu_sums in grouped_by_region_list:
+        if len(lvu_sums) == extended_length:
+            del lvu_sums[-1]
     # print(*grouped_by_region_list, sep='\n')
+
     return grouped_by_region_list
