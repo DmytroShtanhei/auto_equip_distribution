@@ -98,11 +98,11 @@ utils.add_distribution_check_sum(distribution_ws,
                                  distribution_wb,
                                  data_style)
 
-# Highlight problems with Distribution check sums
-utils.check_n_highlight_distribution_sums(contract_ws,
-                                          distribution_ws,
-                                          lvu_list,
-                                          positions_n_units_list)
+# Highlight problems with Distribution check sums and get status of correctness of sums
+sums_are_correct = utils.check_n_highlight_distribution_sums(contract_ws,
+                                                             distribution_ws,
+                                                             lvu_list,
+                                                             positions_n_units_list)
 
 # Highlight problems with Grouping check sums
 utils.check_n_highlight_grouping_sums(distribution_ws,
@@ -115,7 +115,6 @@ utils.check_n_highlight_grouping_sums(distribution_ws,
 utils.check_n_highlight_grouping_units(distribution_ws,
                                        lvu_list,
                                        positions_n_units_list)
-
 
 # ---------------- Create Datasheet with Distribution list grouped by Regions ----------------
 
@@ -146,7 +145,8 @@ utils.style_table_in_worksheet(workbook=distribution_wb,
                                custom_data_style=data_style,
                                max_header_row=2)
 
-utils.customize_grouped_by_region_table(distribution_by_region_ws, lvu_names.lvu_names_list)
+# Customize look of Distribution by Region Table
+utils.customize_grouped_by_region_table(distribution_by_region_ws, lvu_names.lvu_names_list, sums_are_correct)
 
 # Make given sheet active
 distribution_wb.active = distribution_wb['Рознарядка. Перевірка']

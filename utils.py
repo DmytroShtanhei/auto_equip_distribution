@@ -393,7 +393,12 @@ def check_n_highlight_distribution_sums(contract_ws,
                                         distribution_ws,
                                         lvu_list,
                                         positions_n_units_list):
-    """Highlight cells with Distribution Check Sums that don't correspond to Contract Sums"""
+    """
+    Highlight cells with Distribution Check Sums that don't correspond to Contract Sums.
+    Return status of correctness of sums.
+    """
+    sums_are_correct = True
+
     curr_position = 1
     for col in distribution_ws.iter_cols(min_col=3, max_col=len(positions_n_units_list) + 2):
         # Get Distribution Check Sum for Position from Distribution Table
@@ -419,6 +424,9 @@ def check_n_highlight_distribution_sums(contract_ws,
             distribution_ws.cell(len(lvu_list) + 4, len(positions_n_units_list) + 3).value = \
                 ' <- Сумарна кількість не відповідає Договору (можливі причини див. нижче)'
             distribution_ws.cell(len(lvu_list) + 4, len(positions_n_units_list) + 3).font = Font(color='00FF0000')
+            sums_are_correct = False
+
+    return sums_are_correct
 
 
 def check_n_highlight_grouping_sums(distribution_ws,
@@ -427,24 +435,23 @@ def check_n_highlight_grouping_sums(distribution_ws,
                                     lvu_list,
                                     positions_n_units_list):
     """Highlight cells with Grouping sums that don't correspond to Contract sums"""
-    curr_position = 1
     for col in distribution_ws.iter_cols(min_col=3, max_col=len(positions_n_units_list) + 2):
         # Get Grouping Check Sum for Position from Grouping Table (Grouping worksheet)
+        curr_position = col[0].value
         grouping_sum = 0
         for row in grouping_copied_ws.rows:
             if row[12].value == curr_position:
                 grouping_sum += Decimal(str(row[3].value))
 
         # Get Contract Sum for Position from Contract Table
-        row_index = curr_position + 2
-        contract_sum = Decimal(str(contract_ws[f'P{row_index}'].value))
-
-        curr_position += 1
+        contract_sum = 0
+        for row in contract_ws.iter_rows(min_row=3):
+            if row[0].value == curr_position:
+                contract_sum = Decimal(str(row[15].value))
 
         # Highlight Grouping Sums that don't correspond to Contract Sums
         if grouping_sum != contract_sum:
             col[len(lvu_list) + 8].fill = PatternFill(fill_type='solid', start_color='00FF9900')
-
             distribution_ws.cell(len(lvu_list) + 9, len(positions_n_units_list) + 3).value = \
                 ' <- Сумарна кількість не відповідає Договору. Відкоригуйте ФАЙЛ "Групування.xlsx"'
             distribution_ws.cell(len(lvu_list) + 9, len(positions_n_units_list) + 3).font = Font(color='00FF9900')
@@ -458,7 +465,7 @@ def check_n_highlight_grouping_units(distribution_ws,
         grouping_units = col[len(lvu_list) + 9].value
         distribution_units = col[1].value
         # Highlight grouping units that don't correspond to contract units
-        if grouping_units.strip(',').lower() != distribution_units.strip(',').lower():
+        if grouping_units.strip('.').lower() != distribution_units.strip('.').lower():
             col[len(lvu_list) + 9].fill = PatternFill(fill_type='solid', start_color='00FF9900')
             distribution_ws.cell(len(lvu_list) + 10, len(positions_n_units_list) + 3).value = \
                 ' <- Одиниці виміру не відповідають Договору'
@@ -548,7 +555,7 @@ def form_grouped_by_region_list(distribution_full_list_extended):
     return grouped_by_region_list
 
 
-def customize_grouped_by_region_table(distribution_by_region_ws, lvu_names_list):
+def customize_grouped_by_region_table(distribution_by_region_ws, lvu_names_list, sums_are_correct):
     """Customize look of Distribution by Region Table"""
     # Customize rows
     for row in distribution_by_region_ws.iter_rows(min_row=3):
@@ -568,5 +575,12 @@ def customize_grouped_by_region_table(distribution_by_region_ws, lvu_names_list)
         if row[1].value == '':
             distribution_by_region_ws.merge_cells(f'{row[0].coordinate}:{row[-1].coordinate}')
 
+        # Highlight all rows if check sums in distribution list aren't correct
+        if not sums_are_correct:
+            for cell in row:
+                cell.fill = PatternFill(fill_type='solid', start_color='00FF0000')
 
-
+    if not sums_are_correct:
+        distribution_by_region_ws.\
+            append(['Сумарна кількість не відповідає Договору (можливі причини див. аркуш "Рознарядка. Перевірка")'])
+        distribution_by_region_ws[f'A{distribution_by_region_ws.max_row}'].font = Font(color='00FF0000')
