@@ -23,6 +23,24 @@ def copy_table(source_ws, target_ws):
     append_list_to_worksheet(source_table_as_list, target_ws)
 
 
+def customize_grouping_copied_ws(grouping_copied_ws):
+    """Customize Copied to Distribution Workbook Grouping Spreadsheet so it would look like the or original one """
+    grouping_copied_ws.merge_cells('A1:A4')
+    grouping_copied_ws.merge_cells('B1:B4')
+    grouping_copied_ws.merge_cells('C1:F2')
+    grouping_copied_ws.merge_cells('C3:C4')
+    grouping_copied_ws.merge_cells('D3:D4')
+    grouping_copied_ws.merge_cells('E3:F4')
+    grouping_copied_ws.merge_cells('G1:G4')
+    grouping_copied_ws.merge_cells('H1:H2')
+    grouping_copied_ws.merge_cells('H3:H4')
+    grouping_copied_ws.merge_cells('I1:I4')
+    grouping_copied_ws.merge_cells('J1:J4')
+    grouping_copied_ws.merge_cells('K1:K4')
+    grouping_copied_ws.merge_cells('L1:L4')
+    grouping_copied_ws.merge_cells('M1:M4')
+
+
 def prepare_grouping_table(grouping_ws_to_be_prepared):
     """Code for automated preparing of copied grouping spreadsheet."""
     # Spread names of position inside each group of formerly merged cells in the position colon.

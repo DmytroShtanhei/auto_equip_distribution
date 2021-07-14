@@ -23,7 +23,7 @@ if 'Групування' in distribution_wb:
 
 grouping_copied_ws = distribution_wb.create_sheet('Групування')
 utils.copy_table(source_ws=original_grouping_ws, target_ws=grouping_copied_ws)
-# TODO customize header (merge appropriate cells)
+utils.customize_grouping_copied_ws(grouping_copied_ws=grouping_copied_ws)
 utils.prepare_grouping_table(grouping_ws_to_be_prepared=grouping_copied_ws)
 utils.style_table_in_worksheet(workbook=distribution_wb,
                                worksheet=grouping_copied_ws,
