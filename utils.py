@@ -518,6 +518,8 @@ def form_grouped_by_region_list(distribution_full_list_extended):
         the_region_distribution_list = get_distribution_list_for_region(distribution_full_list_extended, region)
         grouped_by_region_list.extend(the_region_distribution_list)
 
+    del grouped_by_region_list[-1]
+
     # Get rid of last element with information about the region for each LVU
     extended_length = len(grouped_by_region_list[0])
     for lvu_sums in grouped_by_region_list:
@@ -526,3 +528,27 @@ def form_grouped_by_region_list(distribution_full_list_extended):
     # print(*grouped_by_region_list, sep='\n')
 
     return grouped_by_region_list
+
+
+def customize_grouped_by_region_table(distribution_by_region_ws, lvu_names_list):
+    """Customize look of Distribution by Region Table"""
+    # Customize rows
+    for row in distribution_by_region_ws.iter_rows(min_row=3):
+
+        # Choose and customize rows with totals
+        if row[1].value in [item[-1] for item in lvu_names_list]:
+            # Merge first and second cells and paste back value of the second cell
+            temp = row[1].value
+            distribution_by_region_ws.merge_cells(f'{row[0].coordinate}:{row[1].coordinate}')
+            row[0].value = temp
+            # Style cells
+            for cell in row:
+                cell.font = Font(bold=True)
+                cell.fill = PatternFill(fill_type='solid', start_color='E9E9E9')
+
+        # Choose and merge cells in empty rows
+        if row[1].value == '':
+            distribution_by_region_ws.merge_cells(f'{row[0].coordinate}:{row[-1].coordinate}')
+
+
+

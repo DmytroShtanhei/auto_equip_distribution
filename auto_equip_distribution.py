@@ -146,8 +146,7 @@ utils.style_table_in_worksheet(workbook=distribution_wb,
                                custom_data_style=data_style,
                                max_header_row=2)
 
-# TODO Add Function for customizing distribution_by_region_ws:
-#  custom styles for Total sums rows
+utils.customize_grouped_by_region_table(distribution_by_region_ws, lvu_names.lvu_names_list)
 
 # Make given sheet active
 distribution_wb.active = distribution_wb['Рознарядка. Перевірка']
