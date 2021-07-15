@@ -3,10 +3,61 @@ Utility functions
 for processing "Договір" and "Групування" .xlsx source files
 and creating "Рознарядка" .xlsx file
 """
+import sys
 import copy
 from decimal import Decimal
-from openpyxl.styles import PatternFill, Font
+import numbers
+from openpyxl.styles import PatternFill, Font, Alignment
 import locale
+
+
+def is_contract_ws_valid(contract_ws):
+    """Validate cells in Contract Worksheet and return True if valid or False if isn't"""
+    is_valid = True
+    for row in contract_ws.iter_rows(min_row=3, max_col=17):
+        if (row[0].value is None or str(row[0].value).strip() == '') or \
+                (row[14].value is None or str(row[14].value).strip() == '') or \
+                not isinstance(row[15].value, numbers.Number):
+            is_valid = False
+
+    return is_valid
+
+
+def is_original_grouping_ws_valid(original_grouping_ws):
+    """Validate cells in Grouping Worksheet and return True if valid or False if isn't"""
+    is_valid = True
+    for row in original_grouping_ws.iter_rows(min_row=5, max_col=13):
+        if (row[2].value is None or str(row[2].value).strip() == '') or \
+                (row[7].value is None or str(row[7].value).strip() == '') or \
+                not isinstance(row[3].value, numbers.Number):
+            is_valid = False
+
+    return is_valid
+
+
+def validation_error_message_to_distribution_ws(distribution_wb,
+                                                distribution_ws,
+                                                contract_ws_is_valid,
+                                                original_grouping_ws_is_valid):
+    """Generate error message in distribution_ws and exit script"""
+    if not contract_ws_is_valid or not original_grouping_ws_is_valid:
+        message = ''
+        if not contract_ws_is_valid:
+            message += 'ФАЙЛ "Рознарядка.xlsx", аркуш "Договір".\n'
+        if not original_grouping_ws_is_valid:
+            message += 'ФАЙЛ "Групування.xlsx".\n'
+        message += 'Не коректні дані або не всі ячейки заповнені.\n' \
+                   'Відкоригуйте та повторіть спробу.'
+        distribution_ws['A1'].value = message
+        distribution_ws['A1'].font = Font(color='00FF0000')
+        distribution_ws['A1'].alignment = Alignment(wrap_text=True)
+        distribution_ws.column_dimensions['A'].width = 50
+
+        # Make given sheet active
+        distribution_wb.active = distribution_wb['Рознарядка. Перевірка']
+        # Save distribution workbook
+        distribution_wb.save(f'Рознарядка.xlsx')
+        sys.exit()
 
 
 def copy_table(source_ws, target_ws):
@@ -73,25 +124,6 @@ def get_lvu_list(grouping_ws):
                 distribution_lvu_list.append(val)
 
     return sorted(list(set(distribution_lvu_list)))
-
-
-# def check_grouping_positions(contract_ws, original_grouping_ws):
-#     """Compare positions in Original Grouping Workbook with positions in Contract Worksheet"""
-#     pass
-#     # Get Contract positions set
-#     for col in contract_ws.iter_cols(min_row=3, max_col=1, values_only=True):
-#         contract_pos_set = set()
-#         for cell in col:
-#             contract_pos_set.add(cell)
-#         print(contract_pos_set)
-#
-#     # Get Original Grouping position set
-#     for col in original_grouping_ws.iter_cols(min_row=5, min_col=13, max_col=13, values_only=False):
-#         grouping_pos_set = set()
-#         for cell in col:
-#             if not isinstance(cell, MergedCell):
-#                 grouping_pos_set.add(cell.value)
-#         print(grouping_pos_set)
 
 
 def get_lvu_list_for_position(grouping_ws, position):

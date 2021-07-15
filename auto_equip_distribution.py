@@ -37,8 +37,17 @@ if 'Рознарядка. Перевірка' in distribution_wb:
 
 distribution_ws = distribution_wb.create_sheet('Рознарядка. Перевірка')
 
-# # Check Contract positions in original Grouping
-# utils.check_grouping_positions(contract_ws, original_grouping_ws)
+if 'Рознарядка по регіонах' in distribution_wb:
+    del distribution_wb['Рознарядка по регіонах']
+
+# Validate data cells in original worksheets (contract_ws and original_grouping_ws).
+contract_ws_is_valid = utils.is_contract_ws_valid(contract_ws)
+original_grouping_ws_is_valid = utils.is_original_grouping_ws_valid(original_grouping_ws)
+# Generate error message in distribution_ws and exit script if data in original worksheets aren't valid
+utils.validation_error_message_to_distribution_ws(distribution_wb,
+                                                  distribution_ws,
+                                                  contract_ws_is_valid,
+                                                  original_grouping_ws_is_valid)
 
 # Get list of positions from Contract table
 positions_n_units_list = utils.get_positions_n_units_list(contract_ws)
@@ -126,8 +135,7 @@ distribution_full_list_extended = utils.get_extend_distribution_full_list(distri
 grouped_by_region_list_with_nbo = utils.form_grouped_by_region_list(distribution_full_list_extended)
 
 # Create new list 'Рознарядка по регіонах' in distribution_wb
-if 'Рознарядка по регіонах' in distribution_wb:
-    del distribution_wb['Рознарядка по регіонах']
+
 distribution_by_region_ws = distribution_wb.create_sheet('Рознарядка по регіонах')
 
 # Create header for Distribution by Regions spreadsheet
