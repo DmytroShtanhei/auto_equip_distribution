@@ -5,6 +5,7 @@ and adding new spreadsheets "Групування" and "Рознарядка" (t
 """
 import copy
 from openpyxl import load_workbook
+import datetime
 import lvu_names
 import utils
 from named_styles import header_style, data_style
@@ -159,4 +160,4 @@ utils.customize_grouped_by_region_table(distribution_by_region_ws, lvu_names.lvu
 # Make given sheet active
 distribution_wb.active = distribution_wb['Рознарядка. Перевірка']
 # Save distribution workbook
-distribution_wb.save(f'Рознарядка.xlsx')
+distribution_wb.save(f'Рознарядка {datetime.datetime.now().strftime("%Y-%m-%d_T%H%M%S")}.xlsx')

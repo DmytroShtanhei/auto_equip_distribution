@@ -4,6 +4,7 @@ for processing "Договір" and "Групування" .xlsx source files
 and creating "Рознарядка" .xlsx file
 """
 import sys
+import datetime
 import copy
 from decimal import Decimal
 import numbers
@@ -56,7 +57,7 @@ def validation_error_message_to_distribution_ws(distribution_wb,
         # Make given sheet active
         distribution_wb.active = distribution_wb['Рознарядка. Перевірка']
         # Save distribution workbook
-        distribution_wb.save(f'Рознарядка.xlsx')
+        distribution_wb.save(f'Рознарядка {datetime.datetime.now().strftime("%Y-%m-%d_T%H%M%S")}.xlsx')
         sys.exit()
 
 
