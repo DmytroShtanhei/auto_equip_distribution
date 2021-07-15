@@ -1,7 +1,8 @@
 """
 Script
-for processing spreadsheet "Договір" (of file "Рознарядка.xlsx") and file "Групування.xlsx"
-and adding new spreadsheets "Групування" and "Рознарядка" (to file "Рознарядка.xlsx")
+for processing spreadsheet of files "Договір.xlsx" and "Групування.xlsx"
+and creating a new file "Рознарядка.xlsx"
+with spreadsheets "Договір", "Групування", "Рознарядка. Перевірка", "Рознарядка".
 """
 import copy
 from openpyxl import load_workbook
@@ -13,7 +14,7 @@ import locale
 
 locale.setlocale(locale.LC_ALL, "")
 
-distribution_wb = load_workbook(filename='Рознарядка.xlsx')
+distribution_wb = load_workbook(filename='Договір.xlsx')
 contract_ws = distribution_wb['Договір']
 
 original_grouping_wb = load_workbook(filename='Групування.xlsx')
@@ -99,7 +100,6 @@ utils.style_table_in_worksheet(workbook=distribution_wb,
                                max_header_row=2,
                                )
 
-# print(utils.get_units_for_position(grouping_copied_ws, 8))
 # Add check sums to distribution spreadsheet
 utils.add_distribution_check_sum(distribution_ws,
                                  grouping_copied_ws,

@@ -44,7 +44,7 @@ def validation_error_message_to_distribution_ws(distribution_wb,
     if not contract_ws_is_valid or not original_grouping_ws_is_valid:
         message = ''
         if not contract_ws_is_valid:
-            message += 'ФАЙЛ "Рознарядка.xlsx", аркуш "Договір".\n'
+            message += 'ФАЙЛ "Договір.xlsx".\n'
         if not original_grouping_ws_is_valid:
             message += 'ФАЙЛ "Групування.xlsx".\n'
         message += 'Не коректні дані або не всі ячейки заповнені.\n' \
@@ -148,11 +148,9 @@ def get_distribution_data_list(positions_n_units_list, grouping_ws):
             for row in grouping_ws.iter_rows(min_row=5, min_col=2, max_col=13, values_only=True):
                 if row[11] == item[0] and row[6] == curr_lvu:
                     curr_sum += Decimal(str(row[2]))
-            # print(f'{curr_lvu} {item[0]} {curr_sum}')
             dist_data_row.append(curr_lvu)
             dist_data_row.append(item[0])
             dist_data_row.append(curr_sum)
-            # print(dist_data_row)
             distribution_data_list.append(dist_data_row)
 
     return distribution_data_list
@@ -160,9 +158,7 @@ def get_distribution_data_list(positions_n_units_list, grouping_ws):
 
 def get_sum_from_distribution_data_list(distribution_data_list, lvu, position):
     """Get needed sum from raw data list for given LVU and position."""
-    # print(distribution_data_list)
     for item in distribution_data_list:
-        # print(item)
         if lvu == item[0] and position == item[1]:
             return item[2]
 
@@ -228,69 +224,11 @@ def create_header_for_distribution_ws(positions_n_units_list, distribution_ws):
     distribution_ws.merge_cells('B1:B2')
 
 
-# def init_table_in_distribution_ws(positions_n_units_list, lvu_list, distribution_ws):
-#     """
-#     Create header for distribution spreadsheet in form of asked table:
-#     lvu | sum_for_pos_1 | ... | sum_for_pos_n
-#     """
-#     # Initialise header list
-#     distribution_header_list = [
-#         '№ п-п',
-#         'Назва ЛВУМГ (ЛВУМГ що замовляло)',
-#     ]
-#     # Append positions to header list
-#     for item in positions_n_units_list:
-#         distribution_header_list.append(item[0])
-#
-#     # Populate distribution_ws header row
-#     for row in distribution_ws.iter_rows(max_row=1, max_col=len(distribution_header_list)):
-#         p = 0
-#         for cell in row:
-#             cell.value = distribution_header_list[p]
-#             p += 1
-#
-#     # Populate units row
-#     for row in distribution_ws.iter_rows(min_row=2, max_row=2, min_col=3, max_col=len(positions_n_units_list) + 2):
-#         p = 0
-#         for cell in row:
-#             cell.value = positions_n_units_list[p][1]
-#             p += 1
-#
-#     # Populate Number in order column
-#     for col in distribution_ws.iter_cols(max_col=1, min_row=3, max_row=len(lvu_list) + 2):
-#         num_in_order = 1
-#         for cell in col:
-#             cell.value = num_in_order
-#             num_in_order += 1
-#
-#     # Merge appropriate cells
-#     distribution_ws.merge_cells('A1:A2')
-#     distribution_ws.merge_cells('B1:B2')
-
-
 def append_list_to_worksheet(list_of_data,
                              worksheet):
     """Add data from List of Data to Worksheet."""
     for row in list_of_data:
         worksheet.append(row)
-
-
-# def populate_table_in_distribution_ws(distribution_ws, lvu_list, positions_n_units_list, distribution_full_list):
-#     """Populate distribution_ws with distribution data from distribution_full_list."""
-#     curr_lvu_list_index = 0
-#     for row in distribution_ws.iter_rows(min_row=3,
-#                                          max_row=len(lvu_list) + 2,
-#                                          max_col=len(positions_n_units_list) + 2,
-#                                          ):
-#         curr_item_in_lvu_list_index = 0
-#         for cell in row:
-#             value = distribution_full_list[curr_lvu_list_index][curr_item_in_lvu_list_index]
-#             if value == 0:
-#                 cell.value = None
-#             else:
-#                 cell.value = value
-#             curr_item_in_lvu_list_index += 1
-#         curr_lvu_list_index += 1
 
 
 # def auto_adjust_col_width(worksheet):
@@ -325,8 +263,6 @@ def style_table_in_worksheet(workbook, worksheet, custom_header_style, custom_da
         else:
             for cell in row:
                 cell.style = custom_data_style.name
-                # if cell.column > 2:
-                #     cell.number_format = '0.000'
 
     # Change column width
     worksheet.column_dimensions['B'].width = 37 + 2
@@ -438,11 +374,8 @@ def check_n_highlight_distribution_sums(contract_ws,
         distribution_sum = 0
         for i in range(2, len(lvu_list) + 2):
             val = col[i].value
-
             if val is None:
                 val = 0
-            # print(Decimal(str(val)))
-            # print(val)
             distribution_sum += val
 
         # Get Contract Sum for Position from Contract Table
