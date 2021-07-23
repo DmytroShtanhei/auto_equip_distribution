@@ -2,10 +2,24 @@
 List of LVU names:
 code | old_name | new_name | region
 """
-lvu_names_list = [
+from pathlib import Path
+from openpyxl import load_workbook
+
+lvu_names_file = Path('ЛВУ - коди-назви.xlsx')
+if lvu_names_file.is_file():
+    lvu_names_wb = load_workbook(filename='ЛВУ - коди-назви.xlsx')
+    lvu_names_ws = lvu_names_wb.active
+    lvu_names_list = []
+    for row in lvu_names_ws.iter_rows(min_row=2):
+        row_as_list = []
+        for cell in row:
+            row_as_list.append(str(cell.value))
+        lvu_names_list.append(row_as_list)
+else:
+    lvu_names_list = [
         ['7001', 'ТОВ «ОГТСУ» апарат', 'ТОВ «ОГТСУ» апарат', 'ТОВ «ОГТСУ» апарат'],
         ['7102', 'Харківське ЛВУМГ', 'Харківське ЛВУМГ', 'СХІД'],
-        ['7103', 'Запорізьке ЛВУМГ', 'Запорізьке ЛВУМГ',  'СХІД'],
+        ['7103', 'Запорізьке ЛВУМГ', 'Запорізьке ЛВУМГ', 'СХІД'],
         ['7104', 'Криворізьке ЛВУМГ', 'Запорізьке ЛВУМГ (Криворізьке)', 'СХІД'],
         ['7105', 'Миколаївське ЛВУМГ', 'Миколаївське ЛВУМГ', 'СХІД'],
         ['7106', 'Краматорське ЛВУМГ', 'Краматорське ЛВУМГ', 'СХІД'],
