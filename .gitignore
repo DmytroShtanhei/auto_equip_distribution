@@ -1,6 +1,6 @@
 # Project related source files
-source_xl
-*.xlsx
+/*.xlsx
+dist/*.exe
 
 # IDE files
 .idea
@@ -17,7 +17,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/*.exe
+
 downloads/
 eggs/
 .eggs/
