@@ -18,6 +18,9 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+!dist/ЛВУ - коди-назви.xlsx
+!dist/Групування.xlsx
+!dist/Договір.xlsx
 downloads/
 eggs/
 .eggs/
