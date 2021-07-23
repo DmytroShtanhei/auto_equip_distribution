@@ -1,5 +1,5 @@
 # Project related source files
-/*.xlsx
+*.xlsx
 dist/*.*
 !dist/auto_equip_distribution.exe
 !dist/ЛВУ - коди-назви.xlsx
