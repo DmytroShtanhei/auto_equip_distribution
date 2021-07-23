@@ -44,7 +44,7 @@ if 'Рознарядка по регіонах' in distribution_wb:
 
 # Validate data cells in original worksheets (contract_ws and original_grouping_ws).
 contract_ws_is_valid = utils.is_contract_ws_valid(contract_ws)
-original_grouping_ws_is_valid = utils.is_original_grouping_ws_valid(original_grouping_ws)
+original_grouping_ws_is_valid = utils.is_original_grouping_ws_valid(original_grouping_ws, lvu_names.lvu_names_list)
 # Generate error message in distribution_ws and exit script if data in original worksheets aren't valid
 utils.validation_error_message_to_distribution_ws(distribution_wb,
                                                   distribution_ws,

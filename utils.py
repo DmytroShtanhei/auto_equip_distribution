@@ -14,26 +14,47 @@ import locale
 
 def is_contract_ws_valid(contract_ws):
     """Validate cells in Contract Worksheet and return True if valid or False if isn't"""
-    is_valid = True
+    data_cells_valid = True
+    data_rows_exist = False
     for row in contract_ws.iter_rows(min_row=3, max_col=17):
+        data_rows_exist = True
         if (row[0].value is None or str(row[0].value).strip() == '') or \
                 (row[14].value is None or str(row[14].value).strip() == '') or \
                 not isinstance(row[15].value, numbers.Number):
-            is_valid = False
+            data_cells_valid = False
 
-    return is_valid
+    if data_cells_valid and data_rows_exist:
+        valid_data = True
+    else:
+        valid_data = False
+
+    return valid_data
 
 
-def is_original_grouping_ws_valid(original_grouping_ws):
+def is_original_grouping_ws_valid(original_grouping_ws, lvu_names_list):
     """Validate cells in Grouping Worksheet and return True if valid or False if isn't"""
-    is_valid = True
+    # Get Lvu Codes set
+    lvu_codes_list = []
+    for lvu in lvu_names_list:
+        lvu_codes_list.append(str(lvu[0]))
+    list(set(lvu_codes_list))
+
+    data_cells_valid = True
+    data_rows_exist = False
     for row in original_grouping_ws.iter_rows(min_row=5, max_col=13):
+        data_rows_exist = True
         if (row[2].value is None or str(row[2].value).strip() == '') or \
                 (row[7].value is None or str(row[7].value).strip() == '') or \
-                not isinstance(row[3].value, numbers.Number):
-            is_valid = False
+                not isinstance(row[3].value, numbers.Number) or \
+                str(row[7].value) not in lvu_codes_list:
+            data_cells_valid = False
 
-    return is_valid
+    if data_cells_valid and data_rows_exist:
+        valid_data = True
+    else:
+        valid_data = False
+
+    return valid_data
 
 
 def validation_error_message_to_distribution_ws(distribution_wb,
