@@ -1,6 +1,9 @@
 # Project related source files
-/*.xlsx
-dist/*.exe
+dist/*.*
+!dist/auto_equip_distribution.exe
+!dist/ЛВУ - коди-назви.xlsx
+!dist/Групування.xlsx
+!dist/Договір.xlsx
 
 # IDE files
 .idea
